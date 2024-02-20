@@ -48,7 +48,10 @@ async def sender():
                 # 如果有新文件，修改时间为1min前，上传到频道
                 print("Uploading", file)
                 # await client.send_file(entity, _file, progress_callback=progress_cb)
-                await upload_file(client, entity, _file, progress_callback=progress_cb)
+
+                with open(_file, "wb") as out:
+                    await upload_file(client, out, progress_callback=progress_cb)
+
                 update_done_file(file)
 
                 print("删除原文件")
@@ -76,7 +79,10 @@ async def receiver():
 
                 # 使用 download_file() 方法下载文件
                 # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
-                await download_file(client, message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
+
+                with open(os.path.join(path, message.file.name), "wb") as out:
+                    await download_file(client, message, out, progress_callback=progress_cb)
+                    
                 update_done_file(message.file.name)
                 print("File Downloaded")
                 print("-----------")
