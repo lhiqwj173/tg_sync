@@ -49,7 +49,8 @@ async def sender():
                 # await client.send_file(entity, _file, progress_callback=progress_cb)
 
                 with open(_file, "rb") as out:
-                    await upload_file(client, out, progress_callback=progress_cb)
+                    media = await upload_file(client, out, progress_callback=progress_cb)
+                    await client.send_file(entity, media)
 
                 update_done_file(file)
 
