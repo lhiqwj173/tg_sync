@@ -5,6 +5,8 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.tl.types import Channel
 
+from FastTelethon import download_file, upload_file
+
 from helper import load_session_string, save_session_string, progress_cb
 from helper import update_done_file, is_done_file
 
@@ -45,7 +47,8 @@ async def sender():
             if not is_done_file(file) and mtime < cur_t - 60 and ctime < cur_t - 60: 
                 # 如果有新文件，修改时间为1min前，上传到频道
                 print("Uploading", file)
-                await client.send_file(entity, _file, progress_callback=progress_cb)
+                # await client.send_file(entity, _file, progress_callback=progress_cb)
+                await upload_file(client, entity, _file, progress_callback=progress_cb)
                 update_done_file(file)
 
                 print("删除原文件")
@@ -72,7 +75,8 @@ async def receiver():
                     continue
 
                 # 使用 download_file() 方法下载文件
-                await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
+                # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
+                await download_file(client, message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
                 update_done_file(message.file.name)
                 print("File Downloaded")
                 print("-----------")
