@@ -48,6 +48,9 @@ async def sender():
                 await client.send_file(entity, _file, progress_callback=progress_cb)
                 update_done_file(file)
 
+                print("删除原文件")
+                os.remove(_file)
+
 async def receiver():
     await get_channel()
     
