@@ -78,12 +78,11 @@ async def receiver():
                 print("-----------")
 
 if __name__ == "__main__":
-    # python .\tg_sync\tg.py sender 25169653 438e1c736268bb6cb139feaa0eedf2d7 drive C:\Users\lh\Desktop\temp\sync
-    # python .\tg_sync\tg.py receiver 27692583 4a6f60ace74a34898a7ff3472b1129f2 drive C:\Users\lh\Desktop\temp\sync
 
     # 获取命令行参数
     if len(sys.argv) != 6:
         print("Usage: python tg.py <sender/receiver> <api_id> <api_hash> <name> <path>")
+        print("Example: python tg.py sender 123456 abcdefghij1234567890 channel_name /path/to/folder")
         sys.exit(1)
 
     role = sys.argv[1]
