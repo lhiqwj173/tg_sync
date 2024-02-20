@@ -1,4 +1,4 @@
-# 使用tg同步文件
+# 使用telegram同步文件
 ## sender: 同步文件夹
 python .\tg_sync\tg.py sender 123456 438e1c736268bb6cb139feaa0eedf2d7 drive C:\Users\lh\Desktop\temp\sync 
 
