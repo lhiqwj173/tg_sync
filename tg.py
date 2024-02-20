@@ -28,7 +28,6 @@ async def sender():
     await get_channel()
     
     while True:
-        await asyncio.sleep(30)
 
         # 获取文件列表
         files = os.listdir(path)
@@ -49,19 +48,19 @@ async def sender():
                 print("Uploading", file)
                 # await client.send_file(entity, _file, progress_callback=progress_cb)
 
-                with open(_file, "wb") as out:
+                with open(_file, "rb") as out:
                     await upload_file(client, out, progress_callback=progress_cb)
 
                 update_done_file(file)
 
                 print("删除原文件")
                 os.remove(_file)
+        await asyncio.sleep(30)
 
 async def receiver():
     await get_channel()
     
     while True:
-        await asyncio.sleep(30)
 
         messages = client.iter_messages(entity)
 
@@ -78,7 +77,7 @@ async def receiver():
                     continue
 
                 # 使用 download_file() 方法下载文件
-                # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
+                await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
 
                 with open(os.path.join(path, message.file.name), "wb") as out:
                     await download_file(client, message, out, progress_callback=progress_cb)
@@ -86,6 +85,7 @@ async def receiver():
                 update_done_file(message.file.name)
                 print("File Downloaded")
                 print("-----------")
+        await asyncio.sleep(30)
 
 if __name__ == "__main__":
 
