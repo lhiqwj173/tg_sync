@@ -163,11 +163,13 @@ if __name__ == "__main__":
         col_depth = db['depth']
         col_trade.create_index([
                 ('symbol', 1),
-                ('save_timestamp', 1)
+                ('save_timestamp', 1),
+                ("id", 1)
             ], unique=True)
         col_depth.create_index([
                 ('symbol', 1),
-                ('save_timestamp', 1)
+                ('save_timestamp', 1),
+                ("id", 1)
             ], unique=True)
 
     # 创建客户端
