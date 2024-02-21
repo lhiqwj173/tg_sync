@@ -29,18 +29,10 @@ async def get_channel():
             break
 
 # 数据库
-client = pymongo.MongoClient()
-db = client['binance']
-col_trade = db['trade']
-col_depth = db['depth']
-col_trade.create_index([
-        ('symbol', 1),
-        ('save_timestamp', 1)
-    ], unique=True)
-col_depth.create_index([
-        ('symbol', 1),
-        ('save_timestamp', 1)
-    ], unique=True)
+client = None
+db = None   
+col_trade = None
+col_depth = None
 
 def handle_file(file):
     parser = None
@@ -142,6 +134,21 @@ if __name__ == "__main__":
     api_hash = sys.argv[3]
     name = sys.argv[4]
     path = sys.argv[5]
+
+    # 初始化数据库
+    if role == "receiver":
+        client = pymongo.MongoClient()
+        db = client['binance']
+        col_trade = db['trade']
+        col_depth = db['depth']
+        col_trade.create_index([
+                ('symbol', 1),
+                ('save_timestamp', 1)
+            ], unique=True)
+        col_depth.create_index([
+                ('symbol', 1),
+                ('save_timestamp', 1)
+            ], unique=True)
 
     # 创建客户端
     client = TelegramClient(StringSession(load_session_string()), api_id, api_hash)
