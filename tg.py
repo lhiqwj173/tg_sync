@@ -49,7 +49,7 @@ async def sender():
                 # await client.send_file(entity, _file, progress_callback=progress_cb)
 
                 with open(_file, "rb") as out:
-                    media = await upload_file(client, out, progress_callback=progress_cb)
+                    media = await upload_file(client, out, file, progress_callback=progress_cb)
                     await client.send_file(entity, media)
 
                 update_done_file(file)
@@ -78,10 +78,10 @@ async def receiver():
                     continue
 
                 # 使用 download_file() 方法下载文件
-                await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
+                # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
 
                 with open(os.path.join(path, message.file.name), "wb") as out:
-                    await download_file(client, message, out, progress_callback=progress_cb)
+                    await download_file(client, message.file, out, progress_callback=progress_cb)
                     
                 update_done_file(message.file.name)
                 print("File Downloaded")
