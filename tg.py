@@ -111,13 +111,15 @@ async def receiver():
                 # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
                 _file = os.path.join(path, message.file.name)
                 with open(_file, "wb") as out:
-                    await download_file(client, message.file, out, progress_callback=progress_cb)
+                    await download_file(client, message.document, out, progress_callback=progress_cb)
                 print("File Downloaded")
-                update_done_file(message.file.name)
 
                 # 处理数据
                 handle_file(_file)
+                print("File Handled")
 
+                update_done_file(message.file.name)
+                print("File Updated")
                 print("-----------")
         await asyncio.sleep(30)
 
