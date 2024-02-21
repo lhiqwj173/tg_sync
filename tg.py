@@ -1,6 +1,8 @@
 import sys, os, time
 import asyncio
 
+import pymongo
+
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.tl.types import Channel
@@ -9,6 +11,8 @@ from FastTelethon import download_file, upload_file
 
 from helper import load_session_string, save_session_string, progress_cb
 from helper import update_done_file, is_done_file
+
+from binance_paser import trade, depth
 
 entity = None
 async def get_channel():
@@ -23,6 +27,42 @@ async def get_channel():
             channel_username = dialog.id  # 替换为频道的用户名或 ID
             entity = await client.get_entity(channel_username)  # 获取频道实体对象
             break
+
+# 数据库
+client = pymongo.MongoClient()
+db = client['binance']
+col_trade = db['trade']
+col_depth = db['depth']
+col_trade.create_index([
+        ('symbol', 1),
+        ('save_timestamp', 1)
+    ], unique=True)
+col_depth.create_index([
+        ('symbol', 1),
+        ('save_timestamp', 1)
+    ], unique=True)
+
+def handle_file(file):
+    parser = None
+    col = None
+    if 'trade' in file:
+        parser = trade(file)
+        col = col_trade
+    elif 'depth_10_100' in file:
+        parser = depth(file)
+        col = col_depth
+    else:
+        return
+
+    # 解析数据
+    datas = [data for data in parser]
+
+    # 插入数据库
+    try:
+        col.insert_many(datas, ordered=False)
+    except Exception as e:
+        print(f'error: {file}')
+        raise e
 
 async def sender():
     await get_channel()
@@ -68,23 +108,24 @@ async def receiver():
         # 循环遍历消息并筛选出包含文件的消息
         async for message in messages:
             if message.file and message.file.name:
+                if is_done_file(message.file.name):
+                    continue
+
                 print("-----------")
                 print("File Name:", message.file.name)
                 print("File Size:", message.file.size)
 
-                if is_done_file(message.file.name):
-                    print("File already downloaded")
-                    print("-----------")
-                    continue
-
                 # 使用 download_file() 方法下载文件
                 # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
-
-                with open(os.path.join(path, message.file.name), "wb") as out:
+                _file = os.path.join(path, message.file.name)
+                with open(_file, "wb") as out:
                     await download_file(client, message.file, out, progress_callback=progress_cb)
-                    
-                update_done_file(message.file.name)
                 print("File Downloaded")
+                update_done_file(message.file.name)
+
+                # 处理数据
+                handle_file(_file)
+
                 print("-----------")
         await asyncio.sleep(30)
 
