@@ -14,6 +14,11 @@ from helper import update_done_file, is_done_file
 
 from binance_paser import trade, depth
 
+"""
+提速
+https://gist.github.com/painor/7e74de80ae0c819d3e9abcf9989a8dd6
+"""
+
 entity = None
 async def get_channel():
     global entity
@@ -47,14 +52,27 @@ def handle_file(file):
         return
 
     # 解析数据
-    datas = [data for data in parser]
+    datas = []
+    for data in parser:
+        datas.append(data)
 
-    # 插入数据库
-    try:
-        col.insert_many(datas, ordered=False)
-    except Exception as e:
-        print(f'error: {file}')
-        raise e
+        if len(datas) == 30:
+            # 插入数据库
+            try:
+                col.insert_many(datas, ordered=False)
+            except Exception as e:
+                print(f'error: {file}')
+                raise e
+
+            datas = []
+
+    if datas:
+        # 插入数据库
+        try:
+            col.insert_many(datas, ordered=False)
+        except Exception as e:
+            print(f'error: {file}')
+            raise e
 
 async def sender():
     await get_channel()
