@@ -29,6 +29,9 @@ class binance_base():
         if self.readed == self.bytes:
             raise StopIteration
 
+        # 进度条
+        print(f'{self.readed}/{self.bytes}', end='')
+
         # 数据大小
         _bytes = self._size()
         self.readed += _bytes
