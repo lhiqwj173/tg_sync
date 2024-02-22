@@ -139,7 +139,8 @@ async def receiver():
                 update_done_file(message.file.name)
                 print("File Updated")
                 print("-----------")
-        await asyncio.sleep(30)
+
+        await asyncio.sleep(60 * 5)
 
 if __name__ == "__main__":
 
