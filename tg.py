@@ -2,6 +2,7 @@ import sys, os, time
 import asyncio
 
 import pymongo
+from pymongo.errors import DuplicateKeyError
 
 from telethon import TelegramClient
 from telethon.sessions import StringSession
@@ -39,6 +40,16 @@ db = None
 col_trade = None
 col_depth = None
 
+def insert_data(datas, col):
+    # 插入数据库
+    try:
+        col.insert_many(datas, ordered=False)
+    except DuplicateKeyError:
+        pass
+    except Exception as e:
+        print(f'error: {file}')
+        raise
+
 def handle_file(file):
     parser = None
     col = None
@@ -58,21 +69,13 @@ def handle_file(file):
 
         if len(datas) == 30:
             # 插入数据库
-            try:
-                col.insert_many(datas, ordered=False)
-            except Exception as e:
-                print(f'error: {file}')
-                raise e
+            insert_data(datas, col)
 
             datas = []
 
     if datas:
         # 插入数据库
-        try:
-            col.insert_many(datas, ordered=False)
-        except Exception as e:
-            print(f'error: {file}')
-            raise e
+        insert_data(datas, col)
 
 async def sender():
     await get_channel()
