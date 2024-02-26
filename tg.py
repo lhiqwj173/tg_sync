@@ -47,17 +47,18 @@ def insert_data(datas, col):
     except DuplicateKeyError:
         pass
     except Exception as e:
-        print(f'error: {file}')
         raise
 
-def handle_file(file):
+def handle_file(file_path):
+    file = os.path.basename(file_path)
+
     parser = None
     col = None
     if 'trade' in file:
-        parser = trade(file)
+        parser = trade(file_path)
         col = col_trade
-    elif 'depth_10_100' in file:
-        parser = depth(file)
+    elif 'depth' in file:
+        parser = depth(file_path)
         col = col_depth
     else:
         return
