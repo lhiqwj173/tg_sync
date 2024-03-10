@@ -12,6 +12,9 @@ class binance_base():
         self.readed = 0
         self.f = None
 
+        self.print_count = 1
+        self.begin_time = 0
+
     def _size(self):
         pass
 
@@ -26,14 +29,23 @@ class binance_base():
         return self
 
     def __next__(self):
+        if self.begin_time == 0:
+            self.begin_time = time.time()
+
         if self.readed == self.bytes:
             raise StopIteration
 
-        # 进度条
-        print(f'{self.readed}/{self.bytes}', end='')
-
         # 数据大小
         _bytes = self._size()
+
+        # 进度条
+        if (self.print_count % 500) == 0:
+            all_count = int(self.bytes/_bytes)
+            done_count = int(self.readed/_bytes)
+            speed = done_count / (time.time() - self.begin_time)
+            remain_time = (all_count - done_count) / speed
+            print(f"\r{done_count}/{all_count} remain:{remain_time:.2f} sec", end='')
+        self.print_count += 1
         self.readed += _bytes
 
         # 读取数据
@@ -152,11 +164,12 @@ class depth(binance_base):
         data['symbol'] = raw[328:344].decode('utf-8').strip('\x00')
         data['save_timestamp'] = struct.unpack('Q', raw[344:352])[0]
 
+        # 返回
         return data
 
 
-
 if __name__ == '__main__':
+
     depth_file = r"C:\Users\lh\Desktop\fsdownload\depth_10_100_1708502752297"
     trade_file = r"C:\Users\lh\Desktop\fsdownload\trade_1708502749235"
 

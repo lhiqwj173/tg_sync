@@ -1,8 +1,10 @@
 import sys, os, time
 import asyncio
-
 import pymongo
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import BulkWriteError
+
+from py_ext.lzma import decompress
+from py_ext.tool import init_logger, log
 
 from telethon import TelegramClient
 from telethon.sessions import StringSession
@@ -19,6 +21,7 @@ from binance_paser import trade, depth
 提速
 https://gist.github.com/painor/7e74de80ae0c819d3e9abcf9989a8dd6
 """
+init_logger("sync_tg_file")
 
 entity = None
 async def get_channel():
@@ -44,12 +47,15 @@ def insert_data(datas, col):
     # 插入数据库
     try:
         col.insert_many(datas, ordered=False)
-    except DuplicateKeyError:
+    except BulkWriteError:
         pass
     except Exception as e:
         raise
 
 def handle_file(file_path):
+    # 解压文件
+    decompress(file_path)
+
     file = os.path.basename(file_path)
 
     parser = None
@@ -99,7 +105,7 @@ async def sender():
             cur_t = time.time()
             if not is_done_file(file) and mtime < cur_t - 60 and ctime < cur_t - 60: 
                 # 如果有新文件，修改时间为1min前，上传到频道
-                print("Uploading", file)
+                log(f"Uploading{file}")
                 # await client.send_file(entity, _file, progress_callback=progress_cb)
 
                 with open(_file, "rb") as out:
@@ -108,8 +114,9 @@ async def sender():
 
                 update_done_file(file)
 
-                print("删除原文件")
+                log("删除原文件")
                 os.remove(_file)
+                
         await asyncio.sleep(30)
 
 async def receiver():
@@ -125,24 +132,24 @@ async def receiver():
                 if is_done_file(message.file.name):
                     continue
 
-                print("-----------")
-                print("File Name:", message.file.name)
-                print("File Size:", message.file.size)
+                log("-----------")
+                log(f"File Name: {message.file.name}")
+                log(f"File Size: {message.file.size}")
 
                 # 使用 download_file() 方法下载文件
                 # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
                 _file = os.path.join(path, message.file.name)
                 with open(_file, "wb") as out:
                     await download_file(client, message.document, out, progress_callback=progress_cb)
-                print("File Downloaded")
+                log("File Downloaded")
 
                 # 处理数据
                 handle_file(_file)
-                print("File Handled")
+                log("File Handled")
 
                 update_done_file(message.file.name)
-                print("File Updated")
-                print("-----------")
+                log("File Updated")
+                log("-----------")
 
         await asyncio.sleep(60 * 5)
 
@@ -150,8 +157,8 @@ if __name__ == "__main__":
 
     # 获取命令行参数
     if len(sys.argv) != 6:
-        print("Usage: python tg.py <sender/receiver> <api_id> <api_hash> <name> <path>")
-        print("Example: python tg.py sender 123456 abcdefghij1234567890 channel_name /path/to/folder")
+        log("Usage: python tg.py <sender/receiver> <api_id> <api_hash> <name> <path>")
+        log("Example: python tg.py sender 123456 abcdefghij1234567890 channel_name /path/to/folder")
         sys.exit(1)
 
     role = sys.argv[1]
