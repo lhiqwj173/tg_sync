@@ -81,7 +81,7 @@ class trade(binance_base):
         data = {}
         data['event_timestamp'] = struct.unpack('Q', raw[:8])[0]
         data['save_timestamp'] = struct.unpack('Q', raw[8:16])[0]
-        data['symbol'] = raw[16:32].decode('utf-8').strip('\x00')
+        data['symbol'] = raw[16:32].decode('utf-8').strip('\x00').lower()
         data['price'] = struct.unpack('d', raw[32:40])[0]
         data['vol'] = struct.unpack('d', raw[40:48])[0]
         data['id'] = struct.unpack('Q', raw[48:56])[0]
@@ -159,7 +159,7 @@ class depth(binance_base):
         data['ask10_vol'] = struct.unpack('d', raw[312:320])[0]
 
         data['id'] = struct.unpack('Q', raw[320:328])[0]
-        data['symbol'] = raw[328:344].decode('utf-8').strip('\x00')
+        data['symbol'] = raw[328:344].decode('utf-8').strip('\x00').lower()
         data['save_timestamp'] = struct.unpack('Q', raw[344:352])[0]
 
         # 返回
