@@ -155,7 +155,7 @@ async def receiver():
 
 if __name__ == "__main__":
 
-    handle_file(r"\\192.168.100.203\wd_media\BINANCE_DATA\trade_1710289475620")
+    # handle_file(r"\\192.168.100.203\wd_media\BINANCE_DATA\trade_1710289475620")
 
     # 获取命令行参数
     if len(sys.argv) != 6:
