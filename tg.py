@@ -128,6 +128,7 @@ async def receiver():
 
         # 循环遍历消息并筛选出包含文件的消息
         messages = [message async for message in messages if message.file and message.file.name and not is_done_file(message.file.name)]
+        log(f'更新消息 {len(messages)} 条')
 
         for message in messages:
             log("-----------")
