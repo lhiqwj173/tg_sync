@@ -127,29 +127,27 @@ async def receiver():
         messages = client.iter_messages(entity)
 
         # 循环遍历消息并筛选出包含文件的消息
-        async for message in messages:
-            if message.file and message.file.name:
-                if is_done_file(message.file.name):
-                    continue
+        messages = [message async for message in messages if message.file and message.file.name and not is_done_file(message.file.name)]
 
-                log("-----------")
-                log(f"File Name: {message.file.name}")
-                log(f"File Size: {message.file.size}")
+        for message in messages:
+            log("-----------")
+            log(f"File Name: {message.file.name}")
+            log(f"File Size: {message.file.size}")
 
-                # 使用 download_file() 方法下载文件
-                # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
-                _file = os.path.join(path, message.file.name)
-                with open(_file, "wb") as out:
-                    await download_file(client, message.document, out, progress_callback=progress_cb)
-                log("File Downloaded")
+            # 使用 download_file() 方法下载文件
+            # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
+            _file = os.path.join(path, message.file.name)
+            with open(_file, "wb") as out:
+                await download_file(client, message.document, out, progress_callback=progress_cb)
+            log("File Downloaded")
 
-                # 处理数据
-                handle_file(_file)
-                log("File Handled")
+            # 处理数据
+            handle_file(_file)
+            log("File Handled")
 
-                update_done_file(message.file.name)
-                log("File Updated")
-                log("-----------")
+            update_done_file(message.file.name)
+            log("File Updated")
+            log("-----------")
 
         await asyncio.sleep(60 * 5)
 
