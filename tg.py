@@ -1,9 +1,9 @@
-import sys, os, time
 import asyncio
+import sys, os, time, datetime
 import pymongo
 from pymongo.errors import BulkWriteError
 
-from py_ext.lzma import decompress
+from py_ext.lzma import decompress, compress_files
 from py_ext.tool import init_logger, log
 
 from telethon import TelegramClient
@@ -121,7 +121,8 @@ async def sender():
 
 async def receiver():
     await get_channel()
-    
+
+    date = datetime.date.today()
     while True:
 
         messages = client.iter_messages(entity)
@@ -149,6 +150,20 @@ async def receiver():
             update_done_file(message.file.name)
             log("File Updated")
             log("-----------")
+
+        # 压缩打包原始raw文件
+        if datetime.date.today() != date:
+            package_name = f"raw_{date}.7z"
+            log(f"压缩打包原始raw文件 > {package_name}")
+
+            # 忽略文件夹
+            files = [os.path.join(path, i) for i in os.listdir(path) if (not i.endswith(".7z")) and (os.path.isfile(os.path.join(path, i)))]
+
+            # 压缩打包
+            compress_files(files, os.path.join(path, package_name), 9)
+
+            date = datetime.date.today()
+            log(f"打包完成, 更新日期 > {date}")
 
         await asyncio.sleep(60 * 5)
 
