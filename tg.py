@@ -54,7 +54,7 @@ def insert_data(datas, col):
 
 def handle_file(file_path):
     # 解压文件
-    decompress(file_path)
+    # decompress(file_path)
 
     file = os.path.basename(file_path)
 
@@ -154,6 +154,8 @@ async def receiver():
         await asyncio.sleep(60 * 5)
 
 if __name__ == "__main__":
+
+    handle_file(r"\\192.168.100.203\wd_media\BINANCE_DATA\trade_1710289475620")
 
     # 获取命令行参数
     if len(sys.argv) != 6:

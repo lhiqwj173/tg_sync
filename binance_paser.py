@@ -56,17 +56,16 @@ class binance_base():
 
 class trade(binance_base):
     def _size(self):
-        return 96
+        return 88
 
     def _pase_data(self, raw):
         """
         ///////////////////////////////
         // 交易数据
         ///////////////////////////////
-        96字节
+        88字节
         8字节对齐
         struct data_trade {
-            int type;
             unsigned long long event_timestamp;
             unsigned long long save_timestamp;
             char[10] symbol;
@@ -80,17 +79,16 @@ class trade(binance_base):
         };
         """
         data = {}
-        data['type'] = struct.unpack('i', raw[:4])[0]
-        data['event_timestamp'] = struct.unpack('Q', raw[8:16])[0]
-        data['save_timestamp'] = struct.unpack('Q', raw[16:24])[0]
-        data['symbol'] = raw[24:40].decode('utf-8').strip('\x00')
-        data['price'] = struct.unpack('d', raw[40:48])[0]
-        data['vol'] = struct.unpack('d', raw[48:56])[0]
-        data['id'] = struct.unpack('Q', raw[56:64])[0]
-        data['buy_id'] = struct.unpack('Q', raw[64:72])[0]
-        data['sell_id'] = struct.unpack('Q', raw[72:80])[0]
-        data['deal_timestamp'] = struct.unpack('Q', raw[80:88])[0]
-        data['is_buyer_maker'] = struct.unpack('?', raw[88:89])[0]
+        data['event_timestamp'] = struct.unpack('Q', raw[:8])[0]
+        data['save_timestamp'] = struct.unpack('Q', raw[8:16])[0]
+        data['symbol'] = raw[16:32].decode('utf-8').strip('\x00')
+        data['price'] = struct.unpack('d', raw[32:40])[0]
+        data['vol'] = struct.unpack('d', raw[40:48])[0]
+        data['id'] = struct.unpack('Q', raw[48:56])[0]
+        data['buy_id'] = struct.unpack('Q', raw[56:64])[0]
+        data['sell_id'] = struct.unpack('Q', raw[64:72])[0]
+        data['deal_timestamp'] = struct.unpack('Q', raw[72:80])[0]
+        data['is_buyer_maker'] = struct.unpack('?', raw[80:81])[0]
         return data
 
 class depth(binance_base):
