@@ -128,10 +128,11 @@ async def receiver():
         messages = client.iter_messages(entity)
 
         # 循环遍历消息并筛选出包含文件的消息
-        messages = [message async for message in messages if message.file and message.file.name and not is_done_file(message.file.name)]
-        log(f'更新消息 {len(messages)} 条')
+        async for message in messages:
 
-        for message in messages:
+            if not (message.file and message.file.name and not is_done_file(message.file.name)):
+                continue
+
             log("-----------")
             log(f"File Name: {message.file.name}")
             log(f"File Size: {message.file.size}")
