@@ -36,7 +36,7 @@ if __name__ == "__main__":
         sys.exit(1)
 
     path = sys.argv[1]
-    date = sys.argv[1]
+    date = sys.argv[2]
 
     date = datetime.datetime.strptime(date, "%Y-%m-%d").date()
     compress_date(date, path)
