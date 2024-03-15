@@ -14,6 +14,7 @@ from FastTelethon import download_file, upload_file
 
 from helper import load_session_string, save_session_string, progress_cb
 from helper import update_done_file, is_done_file
+from compress import compress_date
 
 from binance_paser import trade, depth
 
@@ -119,6 +120,7 @@ async def sender():
                 
         await asyncio.sleep(30)
 
+
 async def receiver():
     await get_channel()
 
@@ -154,15 +156,7 @@ async def receiver():
 
         # 压缩打包原始raw文件
         if datetime.date.today() != date:
-            package_name = f"raw_{date}.7z"
-            log(f"压缩打包原始raw文件 > {package_name}")
-
-            # 忽略文件夹
-            files = [os.path.join(path, i) for i in os.listdir(path) if (not i.endswith(".7z")) and (os.path.isfile(os.path.join(path, i)))]
-
-            # 压缩打包
-            compress_files(files, os.path.join(path, package_name), 9)
-
+            compress_date(date, path)
             date = datetime.date.today()
             log(f"打包完成, 更新日期 > {date}")
 
