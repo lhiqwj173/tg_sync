@@ -1,6 +1,7 @@
 import datetime,sys,os
 
 from py_ext.lzma import decompress, compress_files
+from py_ext.tool import log
 
 path = ''
 date = ''
