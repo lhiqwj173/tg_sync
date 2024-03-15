@@ -132,33 +132,41 @@ async def receiver():
         # 循环遍历消息并筛选出包含文件的消息
         async for message in messages:
 
-            if not (message.file and message.file.name and not is_done_file(message.file.name)):
-                continue
+            try:
+                if not (message.file and message.file.name and not is_done_file(message.file.name)):
+                    continue
 
-            log("-----------")
-            log(f"File Name: {message.file.name}")
-            log(f"File Size: {message.file.size}")
+                log("-----------")
+                log(f"File Name: {message.file.name}")
+                log(f"File Size: {message.file.size}")
 
-            # 使用 download_file() 方法下载文件
-            # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
-            _file = os.path.join(path, message.file.name)
-            with open(_file, "wb") as out:
-                await download_file(client, message.document, out, progress_callback=progress_cb)
-            log("File Downloaded")
+                # 使用 download_file() 方法下载文件
+                # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
+                _file = os.path.join(path, message.file.name)
+                with open(_file, "wb") as out:
+                    await download_file(client, message.document, out, progress_callback=progress_cb)
+                log("File Downloaded")
 
-            # 处理数据
-            handle_file(_file)
-            log("File Handled")
+                # 处理数据
+                handle_file(_file)
+                log("File Handled")
 
-            update_done_file(message.file.name)
-            log("File Updated")
-            log("-----------")
+                update_done_file(message.file.name)
+                log("File Updated")
+                log("-----------")
+            
+            except Exception as e:
+                log(f"Error: {e}")
+                break
 
-        # 压缩打包原始raw文件
-        if datetime.date.today() != date:
-            compress_date(date, path)
-            date = datetime.date.today()
-            log(f"打包完成, 更新日期 > {date}")
+            log("check compress_date")
+            # 压缩打包原始raw文件
+            time_ms = message.file.name.split("_")[-1][:-3]
+            file_date = datetime.datetime.fromtimestamp(int(time_ms)).date()
+            if file_date != date:
+                compress_date(date, path)
+                date = file_date
+                log(f"打包完成, 更新日期 > {date}")
 
         await asyncio.sleep(60 * 5)
 
