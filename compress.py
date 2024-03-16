@@ -48,7 +48,11 @@ def keep_compress_date(path):
             if _date not in dates:
                 dates.append(_date)
 
+        # 排序
+        dates = sorted(dates)
+
         while len(dates) > 1:
+            log(f"dates :{dates}")
             log(f"开始压缩文件日期 :{dates[0]}")
             compress_date(dates[0], path)
             dates = dates[1:]
