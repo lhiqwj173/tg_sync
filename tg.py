@@ -159,14 +159,15 @@ async def receiver():
                 log(f"Error: {e}")
                 break
 
-            log("check compress_date")
-            # 压缩打包原始raw文件
-            time_ms = message.file.name.split("_")[-1][:-3]
-            file_date = datetime.datetime.fromtimestamp(int(time_ms)).date()
-            if file_date > date:
-                compress_date(date, path)
-                date = file_date
-                log(f"打包完成, 更新日期 > {date}")
+            # 不在此处压缩打包，影响效率
+            # log("check compress_date")
+            # # 压缩打包原始raw文件
+            # time_ms = message.file.name.split("_")[-1][:-3]
+            # file_date = datetime.datetime.fromtimestamp(int(time_ms)).date()
+            # if file_date > date:
+            #     compress_date(date, path)
+            #     date = file_date
+            #     log(f"打包完成, 更新日期 > {date}")
 
         await asyncio.sleep(60 * 5)
 
