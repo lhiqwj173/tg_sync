@@ -163,7 +163,7 @@ async def receiver():
             # 压缩打包原始raw文件
             time_ms = message.file.name.split("_")[-1][:-3]
             file_date = datetime.datetime.fromtimestamp(int(time_ms)).date()
-            if file_date != date:
+            if file_date > date:
                 compress_date(date, path)
                 date = file_date
                 log(f"打包完成, 更新日期 > {date}")
