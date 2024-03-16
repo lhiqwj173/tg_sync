@@ -10,9 +10,9 @@ def compress_date(date, path):
     # date: datetime.date(2024, 3, 15)
     package_name = f"raw_{date}.7z"
     package_path = os.path.join(path, package_name)
-    if os.path.exists(package_path):
-        # 更改文件名称
-        package_path.replace('.7z', f'_{time.time()}.7z')
+    # if os.path.exists(package_path):
+    #     # 更改文件名称
+    #     package_path = package_path.replace('.7z', f'_{time.time()}.7z')
 
     log(f"压缩打包原始raw文件 > \n{package_path}")
 
