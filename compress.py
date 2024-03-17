@@ -38,15 +38,27 @@ def keep_compress_date(path):
     # 持久监控压缩日期文件
     while True:
         dates = []
+
+        latest_file = ''
+        latest_file_time = 0
         for f in os.listdir(path):
             filepath = os.path.join(path, f)
             if not os.path.isfile(filepath) or f.endswith(".7z"):
                 continue
+
+            # 获取文件修改时间
+            mtime = os.path.getmtime(filepath)
+            if mtime > latest_file_time:
+                latest_file = filepath
+                latest_file_time = mtime
+            modified_time = time.ctime(mtime)
             
             t = f.split("_")[-1][:-3]
             _date = datetime.datetime.fromtimestamp(int(t)).date()
             if _date not in dates:
                 dates.append(_date)
+
+        print(f"File: {latest_file}, Modified Time: {latest_file_time}")
 
         # 排序
         dates = sorted(dates)

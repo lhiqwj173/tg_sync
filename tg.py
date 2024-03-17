@@ -127,7 +127,7 @@ async def receiver():
     date = datetime.date.today()
     while True:
 
-        messages = client.iter_messages(entity)
+        messages = client.iter_messages(entity, reverse=True)
 
         # 循环遍历消息并筛选出包含文件的消息
         async for message in messages:
