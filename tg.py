@@ -6,7 +6,7 @@ from multiprocessing import Process, Queue
 
 from py_ext.lzma import decompress, compress_files
 from py_ext.tool import init_logger, log
-from py_ext.wechat import send_msg
+from py_ext.wechat import send_wx
 
 from telethon import TelegramClient
 from telethon.sessions import StringSession
@@ -150,7 +150,7 @@ def saver(job_q, update_q, id):
         # 处理数据
         if not handle_file(_file):
             msg = f"[{id}]File Handled Error: {_file}"
-            send_msg(msg)
+            send_wx(msg)
             log(msg)
             continue
 
