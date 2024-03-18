@@ -145,12 +145,14 @@ def saver(job_q, update_q, id):
 async def receiver():
     await get_channel()
 
-    job_q = Queue()
+    jobs = 3
+
+    job_q = Queue(maxsize=jobs)
     update_q = Queue()
 
     # 启动saver进程 * 3
     p_list = []
-    for i in range(3):
+    for i in range(jobs):
         p_list.append(Process(target=saver, args=(job_q, update_q, i)))
         p_list[-1].start()
 
