@@ -60,7 +60,10 @@ def handle_file(file_path):
         return True
 
     # 解压文件
-    decompress(file_path)
+    try:
+        decompress(file_path)
+    except:
+        return False
 
     file = os.path.basename(file_path)
 
