@@ -2,6 +2,7 @@ import asyncio
 import sys, os, time, datetime
 import pymongo
 from pymongo.errors import BulkWriteError
+from multiprocessing import Process, Queue
 
 from py_ext.lzma import decompress, compress_files
 from py_ext.tool import init_logger, log
@@ -120,17 +121,47 @@ async def sender():
                 
         await asyncio.sleep(30)
 
+def updater(update_q):
+    while not update_q.empty():
+        _name = update_q.get()
+        update_done_file(_name)
+        log(f"File Updated: {_name}")
+
+def saver(job_q, update_q, id):
+    log(f"[{id}]Saver Started")
+    while True:
+        _file = job_q.get()
+        log(f"[{id}]File Received: {_file}")
+
+        # 处理数据
+        handle_file(_file)
+
+        # 分割文件名
+        _name = os.path.basename(_file)
+        update_q.put(_name)
+        log(f"[{id}]File Handled, send to updater {_name}")
+
 
 async def receiver():
     await get_channel()
 
-    date = datetime.date.today()
-    while True:
+    job_q = Queue()
+    update_q = Queue()
 
+    # 启动saver进程 * 3
+    p_list = []
+    for i in range(3):
+        p_list.append(Process(target=saver, args=(job_q, update_q, i)))
+        p_list[-1].start()
+
+    while True:
         messages = client.iter_messages(entity, reverse=True)
 
         # 循环遍历消息并筛选出包含文件的消息
         async for message in messages:
+
+            # 检查是否处理更新
+            updater(update_q)
 
             try:
                 if not (message.file and message.file.name and not is_done_file(message.file.name)):
@@ -145,16 +176,11 @@ async def receiver():
                 _file = os.path.join(path, message.file.name)
                 with open(_file, "wb") as out:
                     await download_file(client, message.document, out, progress_callback=progress_cb)
-                log("File Downloaded")
 
-                # 处理数据
-                handle_file(_file)
-                log("File Handled")
-
-                update_done_file(message.file.name)
-                log("File Updated")
+                job_q.put(_file)
+                log(f"File Downloaded, send to saver {message.file.name}")
                 log("-----------")
-            
+
             except Exception as e:
                 log(f"Error: {e}")
                 break

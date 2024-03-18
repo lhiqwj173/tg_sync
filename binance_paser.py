@@ -29,8 +29,8 @@ class binance_base():
         return self
 
     def __next__(self):
-        if self.begin_time == 0:
-            self.begin_time = time.time()
+        # if self.begin_time == 0:
+        #     self.begin_time = time.time()
 
         if self.readed == self.bytes:
             raise StopIteration
@@ -38,14 +38,14 @@ class binance_base():
         # 数据大小
         _bytes = self._size()
 
-        # 进度条
-        if (self.print_count % 500) == 0:
-            all_count = int(self.bytes/_bytes)
-            done_count = int(self.readed/_bytes)
-            speed = done_count / (time.time() - self.begin_time)
-            remain_time = (all_count - done_count) / speed
-            print(f"\r{done_count}/{all_count} remain:{remain_time:.2f} sec", end='')
-        self.print_count += 1
+        # # 进度条
+        # if (self.print_count % 500) == 0:
+        #     all_count = int(self.bytes/_bytes)
+        #     done_count = int(self.readed/_bytes)
+        #     speed = done_count / (time.time() - self.begin_time)
+        #     remain_time = (all_count - done_count) / speed
+        #     print(f"\r{done_count}/{all_count} remain:{remain_time:.2f} sec", end='')
+        # self.print_count += 1
         self.readed += _bytes
 
         # 读取数据
