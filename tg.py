@@ -6,6 +6,7 @@ from multiprocessing import Process, Queue
 
 from py_ext.lzma import decompress, compress_files
 from py_ext.tool import init_logger, log
+from py_ext.wechat import send_msg
 
 from telethon import TelegramClient
 from telethon.sessions import StringSession
@@ -78,22 +79,26 @@ def handle_file(file_path):
     else:
         return False
 
-    # 解析数据
-    datas = []
-    for data in parser:
-        datas.append(data)
+    try:
+        # 解析数据
+        datas = []
+        for data in parser:
+            datas.append(data)
 
-        if len(datas) == 30:
+            if len(datas) == 30:
+                # 插入数据库
+                insert_data(datas, col)
+
+                datas = []
+
+        if datas:
             # 插入数据库
             insert_data(datas, col)
 
-            datas = []
-
-    if datas:
-        # 插入数据库
-        insert_data(datas, col)
-
-    return True
+        return True
+    except Exception as e:
+        log(f"Error: {e}")
+        return False
 
 async def sender():
     await get_channel()
@@ -144,6 +149,9 @@ def saver(job_q, update_q, id):
 
         # 处理数据
         if not handle_file(_file):
+            msg = f"[{id}]File Handled Error: {_file}"
+            send_msg(msg)
+            log(msg)
             continue
 
         # 分割文件名
