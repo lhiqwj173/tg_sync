@@ -57,7 +57,7 @@ def insert_data(datas, col):
 def handle_file(file_path):
     # 判断文件是否存在
     if not os.path.exists(file_path):
-        return false
+        return True
 
     # 解压文件
     decompress(file_path)
@@ -73,7 +73,7 @@ def handle_file(file_path):
         parser = depth(file_path)
         col = col_depth
     else:
-        return false
+        return False
 
     # 解析数据
     datas = []
@@ -90,7 +90,7 @@ def handle_file(file_path):
         # 插入数据库
         insert_data(datas, col)
 
-    return true
+    return True
 
 async def sender():
     await get_channel()
