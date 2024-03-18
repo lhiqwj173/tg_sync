@@ -55,6 +55,10 @@ def insert_data(datas, col):
         raise
 
 def handle_file(file_path):
+    # 判断文件是否存在
+    if not os.path.exists(file_path):
+        return false
+
     # 解压文件
     decompress(file_path)
 
@@ -69,7 +73,7 @@ def handle_file(file_path):
         parser = depth(file_path)
         col = col_depth
     else:
-        return
+        return false
 
     # 解析数据
     datas = []
@@ -85,6 +89,8 @@ def handle_file(file_path):
     if datas:
         # 插入数据库
         insert_data(datas, col)
+
+    return true
 
 async def sender():
     await get_channel()
@@ -134,7 +140,8 @@ def saver(job_q, update_q, id):
         log(f"[{id}]File Received: {_file}")
 
         # 处理数据
-        handle_file(_file)
+        if not handle_file(_file):
+            continue
 
         # 分割文件名
         _name = os.path.basename(_file)
