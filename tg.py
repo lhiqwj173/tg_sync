@@ -174,6 +174,8 @@ async def receiver():
         p_list.append(Process(target=saver, args=(job_q, update_q, i)))
         p_list[-1].start()
 
+    working_list = []
+
     while True:
         messages = client.iter_messages(entity, reverse=True)
 
@@ -184,7 +186,7 @@ async def receiver():
             updater(update_q)
 
             try:
-                if not (message.file and message.file.name and not is_done_file(message.file.name)):
+                if not (message.file and message.file.name and not is_done_file(message.file.name) and message.file.name not in working_list):
                     continue
 
                 log("-----------")
@@ -199,6 +201,7 @@ async def receiver():
 
                 job_q.put(_file)
                 log(f"File Downloaded, send to saver {message.file.name}")
+                working_list.append(message.file.name)
                 log("-----------")
 
             except Exception as e:
