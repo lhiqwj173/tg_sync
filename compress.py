@@ -52,7 +52,7 @@ def keep_compress_date(path):
         # 排序
         dates = sorted(dates)
 
-        while len(dates) > 1:
+        while len(dates) > 2:
             log(f"dates :{dates}")
             log(f"开始压缩文件日期 :{dates[0]}")
             compress_date(dates[0], path)
