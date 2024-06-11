@@ -46,15 +46,7 @@ db = None
 col_trade = None
 col_depth = None
 
-
-init_daily_folder = False
-def insert_data(datas, col):
-
-    global init_daily_folder
-    daily_folder = os.path.join(os.path.dirname(path), 'binance_daily_mean_std_data')
-    if not init_daily_folder:
-        os.makedirs(daily_folder, exist_ok=True)
-        init_daily_folder = True
+def insert_data(datas, col, id):
 
     if "bid1_price" in datas[0]:
         _wait_write = {}
@@ -67,7 +59,7 @@ def insert_data(datas, col):
                 _wait_write[date].append(data)
 
         for date in _wait_write:
-            file = os.path.join(daily_folder, f'{date}_depth.csv')
+            file = os.path.join(daily_folder, f'{date}_depth_{id}.csv')
             # 如果文件不存在，需要写入列名
             if os.path.exists(file) == False:
                 with open(file, 'w') as f:
@@ -99,7 +91,7 @@ def insert_data(datas, col):
     except Exception as e:
         raise
 
-def handle_file(file_path):
+def handle_file(file_path, id):
     # 判断文件是否存在
     if not os.path.exists(file_path):
         return True
@@ -131,13 +123,13 @@ def handle_file(file_path):
 
             if len(datas) == 30:
                 # 插入数据库
-                insert_data(datas, col)
+                insert_data(datas, col, id)
 
                 datas = []
 
         if datas:
             # 插入数据库
-            insert_data(datas, col)
+            insert_data(datas, col, id)
 
         return True
     except Exception as e:
@@ -192,7 +184,7 @@ def saver(job_q, update_q, id):
         log(f"[{id}]File Received: {_file}")
 
         # 处理数据
-        if not handle_file(_file):
+        if not handle_file(_file, id):
             msg = f"[{id}]File Handled Error: {_file}"
             send_wx(msg)
             log(msg)
@@ -278,9 +270,13 @@ if __name__ == "__main__":
     api_hash = sys.argv[3]
     name = sys.argv[4]
     path = sys.argv[5]
+    daily_folder = ''
 
     # 初始化数据库
     if role == "receiver":
+        daily_folder = os.path.join(os.path.dirname(path), 'binance_daily_mean_std_data')
+        os.makedirs(daily_folder, exist_ok=True)
+
         client = pymongo.MongoClient()
         db = client['binance']
         col_trade = db['trade']
