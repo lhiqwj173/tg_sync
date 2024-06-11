@@ -46,10 +46,8 @@ db = None
 col_trade = None
 col_depth = None
 
-def insert_data(datas, col, id):
-
+def check_need_write(dates, _wait_write):
     if "bid1_price" in datas[0]:
-        _wait_write = {}
         for data in datas:
             if data['symbol'] in ['ethfdusd', 'ethusdt', 'btcfdusd', 'btcusdt']:
                 dt = datetime.datetime.fromtimestamp(int(data['save_timestamp'] / 1000))
@@ -58,31 +56,33 @@ def insert_data(datas, col, id):
                     _wait_write[date] = []
                 _wait_write[date].append(data)
 
-        for date in _wait_write:
-            file = os.path.join(daily_folder, f'{date}_depth_{id}.csv')
-            # 如果文件不存在，需要写入列名
-            if os.path.exists(file) == False:
-                with open(file, 'w') as f:
-                    f.write('datetime,code,卖1价,卖1量,买1价,买1量,卖2价,卖2量,买2价,买2量,卖3价,卖3量,买3价,买3量,卖4价,卖4量,买4价,买4量,卖5价,卖5量,买5价,买5量,卖6价,卖6量,买6价,买6量,卖7价,卖7量,买7价,买7量,卖8价,卖8量,买8价,买8量,卖9价,卖9量,买9价,买9量,卖10价,卖10量,买10价,买10量\n')
+def write_daily(_wait_write, id):
+    for date in _wait_write:
+        file = os.path.join(daily_folder, f'{date}_depth_{id}.csv')
+        # 如果文件不存在，需要写入列名
+        if os.path.exists(file) == False:
+            with open(file, 'w') as f:
+                f.write('datetime,code,卖1价,卖1量,买1价,买1量,卖2价,卖2量,买2价,买2量,卖3价,卖3量,买3价,买3量,卖4价,卖4量,买4价,买4量,卖5价,卖5量,买5价,买5量,卖6价,卖6量,买6价,买6量,卖7价,卖7量,买7价,买7量,卖8价,卖8量,买8价,买8量,卖9价,卖9量,买9价,买9量,卖10价,卖10量,买10价,买10量\n')
 
-            with open(file, 'a', buffering=8192 * 2) as f:
-                for data in _wait_write[date]:
-                    f.write(
-                        # 'datetime', 'code', '卖1价', '卖1量', '买1价', '买1量', '卖2价', '卖2量', '买2价', '买2量', '卖3价', '卖3量', '买3价', '买3量', '卖4价', '卖4量', '买4价', '买4量', '卖5价', '卖5量', '买5价', '买5量', '卖6价', '卖6量', '买6价', '买6量', '卖7价', '卖7量', '买7价', '买7量', '卖8价', '卖8量', '买8价', '买8量', '卖9价', '卖9量', '买9价', '买9量', '卖10价', '卖10量', '买10价', '买10量'
-                        f'{data["save_timestamp"]},{data["symbol"]},'
-                    )
+        with open(file, 'a', buffering=8192 * 2) as f:
+            for data in _wait_write[date]:
+                f.write(
+                    # 'datetime', 'code', '卖1价', '卖1量', '买1价', '买1量', '卖2价', '卖2量', '买2价', '买2量', '卖3价', '卖3量', '买3价', '买3量', '卖4价', '卖4量', '买4价', '买4量', '卖5价', '卖5量', '买5价', '买5量', '卖6价', '卖6量', '买6价', '买6量', '卖7价', '卖7量', '买7价', '买7量', '卖8价', '卖8量', '买8价', '买8量', '卖9价', '卖9量', '买9价', '买9量', '卖10价', '卖10量', '买10价', '买10量'
+                    f'{data["save_timestamp"]},{data["symbol"]},'
+                )
 
-                    for i in range(10):
-                        f.write(str(data[f'ask{i+1}_price']) + ',')
-                        f.write(str(data[f'ask{i+1}_vol']) + ',')
-                        f.write(str(data[f'bid{i+1}_price']) + ',')
-                        f.write(str(data[f'bid{i+1}_vol']))
+                for i in range(10):
+                    f.write(str(data[f'ask{i+1}_price']) + ',')
+                    f.write(str(data[f'ask{i+1}_vol']) + ',')
+                    f.write(str(data[f'bid{i+1}_price']) + ',')
+                    f.write(str(data[f'bid{i+1}_vol']))
 
-                        if i < 9:
-                            f.write(',')
-                        
-                    f.write('\n')
+                    if i < 9:
+                        f.write(',')
+                    
+                f.write('\n')
 
+def insert_data(datas, col):
     # 插入数据库
     try:
         col.insert_many(datas, ordered=False)
@@ -118,18 +118,25 @@ def handle_file(file_path, id):
     try:
         # 解析数据
         datas = []
+        wait_write = {}
         for data in parser:
             datas.append(data)
 
             if len(datas) == 30:
+                check_need_write(datas, wait_write)
                 # 插入数据库
-                insert_data(datas, col, id)
+                insert_data(datas, col)
 
                 datas = []
 
         if datas:
+            check_need_write(datas, wait_write)
             # 插入数据库
-            insert_data(datas, col, id)
+            insert_data(datas, col)
+
+        # 写入每日文件
+        log(f"记录文件")
+        write_daily(wait_write, id)
 
         return True
     except Exception as e:
