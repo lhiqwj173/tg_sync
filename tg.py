@@ -116,6 +116,7 @@ def handle_file(file_path, id):
         return False
 
     try:
+        t0 = time.time()
         # 解析数据
         datas = []
         wait_write = {}
@@ -134,9 +135,14 @@ def handle_file(file_path, id):
             # 插入数据库
             insert_data(datas, col)
 
-        # 写入每日文件
-        log(f"记录文件")
-        write_daily(wait_write, id)
+        log(f'{file} 写入mongo完毕, 耗时:{time.time() - t0:.2f}s')
+        t0 = time.time()
+
+        if wait_write:
+            # 写入每日文件
+            log(f"记录文件")
+            write_daily(wait_write, id)
+            log(f'{file} 写入文件完毕, 耗时:{time.time() - t0:.2f}s')
 
         return True
     except Exception as e:
