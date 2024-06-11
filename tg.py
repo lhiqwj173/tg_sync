@@ -46,7 +46,7 @@ db = None
 col_trade = None
 col_depth = None
 
-def check_need_write(dates, _wait_write):
+def check_need_write(datas, _wait_write):
     if "bid1_price" in datas[0]:
         for data in datas:
             if data['symbol'] in ['ethfdusd', 'ethusdt', 'btcfdusd', 'btcusdt']:
