@@ -46,7 +46,51 @@ db = None
 col_trade = None
 col_depth = None
 
+
+init_daily_folder = False
 def insert_data(datas, col):
+
+    global init_daily_folder
+    daily_folder = os.path.join(os.path.dirname(path), 'binance_daily_mean_std_data')
+    if not init_daily_folder:
+        os.makedirs(daily_folder, exist_ok=True)
+        init_daily_folder = True
+
+    if "bid1_price" in datas[0]:
+        _wait_write = {}
+        for data in datas:
+            if data['symbol'] in ['ethfdusd', 'ethusdt', 'btcfdusd', 'btcusdt']:
+                dt = datetime.datetime.fromtimestamp(int(data['save_timestamp'] / 1000))
+                date = dt.date()
+                if date not in _wait_write:
+                    _wait_write[date] = []
+                _wait_write[date].append(data)
+
+        for date in _wait_write:
+            file = os.path.join(daily_folder, f'{date}_depth.csv')
+            # 如果文件不存在，需要写入列名
+            if os.path.exists(file) == False:
+                with open(file, 'w') as f:
+                    f.write('datetime,code,卖1价,卖1量,买1价,买1量,卖2价,卖2量,买2价,买2量,卖3价,卖3量,买3价,买3量,卖4价,卖4量,买4价,买4量,卖5价,卖5量,买5价,买5量,卖6价,卖6量,买6价,买6量,卖7价,卖7量,买7价,买7量,卖8价,卖8量,买8价,买8量,卖9价,卖9量,买9价,买9量,卖10价,卖10量,买10价,买10量\n')
+
+            with open(file, 'a') as f:
+                for data in _wait_write[date]:
+                    f.write(
+                        # 'datetime', 'code', '卖1价', '卖1量', '买1价', '买1量', '卖2价', '卖2量', '买2价', '买2量', '卖3价', '卖3量', '买3价', '买3量', '卖4价', '卖4量', '买4价', '买4量', '卖5价', '卖5量', '买5价', '买5量', '卖6价', '卖6量', '买6价', '买6量', '卖7价', '卖7量', '买7价', '买7量', '卖8价', '卖8量', '买8价', '买8量', '卖9价', '卖9量', '买9价', '买9量', '卖10价', '卖10量', '买10价', '买10量'
+                        f'{data["save_timestamp"]},{data["symbol"]},'
+                    )
+
+                    for i in range(10):
+                        f.write(str(data[f'ask{i+1}_price']) + ',')
+                        f.write(str(data[f'ask{i+1}_vol']) + ',')
+                        f.write(str(data[f'bid{i+1}_price']) + ',')
+                        f.write(str(data[f'bid{i+1}_vol']))
+
+                        if i < 9:
+                            f.write(',')
+                        
+                    f.write('\n')
+
     # 插入数据库
     try:
         col.insert_many(datas, ordered=False)
@@ -158,7 +202,6 @@ def saver(job_q, update_q, id):
         _name = os.path.basename(_file)
         update_q.put(_name)
         log(f"[{id}]File Handled, send to updater {_name}")
-
 
 async def receiver():
     await get_channel()
