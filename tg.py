@@ -58,11 +58,15 @@ def check_need_write(datas, _wait_write):
                 _wait_write[date].append(data)
 
 
-def compress_date_file_to_tg():
+def compress_date_file_to_tg(new_date):
     # 按日期整理
     folder_datas = {}
     for file in os.listdir(daily_folder):
         date = file.split('_')[0]
+
+        if date >= new_date:
+            continue
+
         if date not in folder_datas:
             folder_datas[date] = []
         folder_datas[date].append(file)
@@ -97,10 +101,10 @@ def write_daily(_wait_write, id):
         if new_day:
             # 打包压缩所有的日期文件
             # 发送到tg频道
-            compress_date_file_to_tg()
+            compress_date_file_to_tg(date)
 
         # 测试
-        compress_date_file_to_tg()
+        compress_date_file_to_tg(date)
 
         file = os.path.join(daily_folder, f'{date}_depth_{id}.csv')
         # 如果文件不存在，需要写入列名
