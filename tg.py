@@ -64,9 +64,11 @@ def compress_date_file_to_tg(new_date):
     # 按日期整理
     folder_datas = {}
     for file in os.listdir(daily_folder):
-        date = file.split('_')[0]
+        if 'depth' not in file or '.csv' not in file:
+            continue
 
-        if date >= new_date:
+        date = file.split('_')[0]
+        if len(date) != 10 or date >= new_date:
             continue
 
         if date not in folder_datas:
@@ -85,7 +87,7 @@ def compress_date_file_to_tg(new_date):
 
         # # 删除源文件
         log(f"delete {out_file}")
-        # os.remove(out_file)
+        os.remove(out_file)
 
 def write_daily(_wait_write, id):
     _wait_write = dict(sorted(_wait_write.items()))
