@@ -57,6 +57,21 @@ def check_need_write(datas, _wait_write):
                     _wait_write[date] = []
                 _wait_write[date].append(data)
 
+def run_kaggle_notebook(notebook):
+    # 切换到指定目录
+    _path = os.getcwd()
+    os.chdir('/mnt/ssd/root/code/kaggle/')
+
+    # 定义要执行的命令
+    command2 = f"kaggle kernels pull {notebook} -m"
+    command3 = "kaggle kernels push"
+
+    # 使用subprocess运行命令
+    subprocess.run(command2, shell=True)
+    subprocess.run(command3, shell=True)
+
+    # 恢复
+    os.chdir(_path)
 
 def compress_date_file_to_tg(new_date):
     new_date = str(new_date)
@@ -89,6 +104,11 @@ def compress_date_file_to_tg(new_date):
         log(f"delete {out_file}")
         os.remove(out_file)
 
+        # 重启kaggle计算
+        notebook = 'qtz173/bin-daily-run'
+        log(f"启动kaggle {notebook}")
+        run_kaggle_notebook(notebook)
+
 def write_daily(_wait_write, id):
     _wait_write = dict(sorted(_wait_write.items()))
 
@@ -109,8 +129,8 @@ def write_daily(_wait_write, id):
             # 发送到tg频道
             compress_date_file_to_tg(date)
 
-        log(f"测试打包每日数据")
-        compress_date_file_to_tg(date)
+        # log(f"测试打包每日数据")
+        # compress_date_file_to_tg(date)
 
         file = os.path.join(daily_folder, f'{date}_depth_{id}.csv')
         # 如果文件不存在，需要写入列名
