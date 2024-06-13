@@ -1,6 +1,6 @@
 import asyncio
 import sys, os, time, datetime
-import pymongo
+import pymongo, subprocess
 from pymongo.errors import BulkWriteError
 from multiprocessing import Process, Queue
 
