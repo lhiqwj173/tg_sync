@@ -129,8 +129,8 @@ def write_daily(_wait_write, id):
             # 发送到tg频道
             compress_date_file_to_tg(date)
 
-        # log(f"测试打包每日数据")
-        # compress_date_file_to_tg(date)
+        log(f"测试打包每日数据")
+        compress_date_file_to_tg(date)
 
         file = os.path.join(daily_folder, f'{date}_depth_{id}.csv')
         # 如果文件不存在，需要写入列名
