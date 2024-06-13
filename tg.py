@@ -144,7 +144,12 @@ def handle_file(file_path, id):
         # 解压文件
         try:
             log(f"{file} 解压文件")
-            decompress(file_path)
+            decompress(file_path, 'decompress_temp')
+
+            # 移出文件
+            folder, file_name = os.path.split(file_path)
+            temp_file = os.path.join(folder, 'decompress_temp', 'data', file_name)
+            os.rename(temp_file, file_path)
         
         except Exception as e:
             log(f"{file} 解压文件失败\n{e}")
