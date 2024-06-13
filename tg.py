@@ -100,9 +100,9 @@ def compress_date_file_to_tg(new_date):
         ses = '1BVtsOGYBu8XQemcEajKaoxqYAUOVIlF-Dyb9zCzR5Na9DJKVTC03W23hU6wB2wkyrMfkCqEXasFyPBbEd5p3TLoGktw5quatBHmj5ln7cm8lW5kmeW4RaK-idCzswxPEgX_oiz6NqNlG5I5HMifzMcORrmTtstshq93AaidszKe3LCTjQ09qpt3ORi66RipkdI-Q5qmaFfkDMKIiEtQWMa1MXzZ6d8-rt4OFrx8M545Z7budJGyVxvzxskH0uq9gNC4lPP-p97irGafb9Vn26ZvrU_ETMeadoh5qKqs_IT2_AFgZeAa53PnYH_qbcaO2AMRWmsHxMlocv4baVk_PHJfIMooPiDU='
         tg_upload(ses, out_file, 'bin_daily')
 
-        # # 删除源文件
-        log(f"delete {out_file}")
-        os.remove(out_file)
+        # # # 删除源文件
+        # log(f"delete {out_file}")
+        # os.remove(out_file)
 
     if len(folder_datas) > 0:
         # 重启kaggle计算
