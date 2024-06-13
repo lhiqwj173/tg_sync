@@ -153,6 +153,7 @@ def handle_file(file_path, id):
         
         except Exception as e:
             log(f"{file} 解压文件失败\n{e}")
+            raise
             return False
 
         log(f"{file} 分配 parser")
