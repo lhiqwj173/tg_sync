@@ -59,6 +59,8 @@ def check_need_write(datas, _wait_write):
 
 
 def compress_date_file_to_tg(new_date):
+    new_date = str(new_date)
+
     # 按日期整理
     folder_datas = {}
     for file in os.listdir(daily_folder):
