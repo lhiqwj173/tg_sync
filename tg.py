@@ -252,7 +252,7 @@ def saver(job_q, update_q, id):
 async def receiver():
     await get_channel()
 
-    jobs = 3
+    jobs = 1
 
     job_q = Queue(maxsize=jobs)
     update_q = Queue()
