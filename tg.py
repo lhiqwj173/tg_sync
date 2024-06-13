@@ -18,6 +18,7 @@ from helper import load_session_string, save_session_string, progress_cb
 from helper import update_done_file, is_done_file
 from compress import compress_date
 
+from py_ext.tg import tg_upload
 from binance_paser import trade, depth
 
 """
@@ -56,8 +57,48 @@ def check_need_write(datas, _wait_write):
                     _wait_write[date] = []
                 _wait_write[date].append(data)
 
+
+def compress_date_file_to_tg():
+    # 按日期整理
+    folder_datas = {}
+    for file in os.listdir(daily_folder):
+        date = file.split('_')[0]
+        if date not in folder_datas:
+            folder_datas[date] = []
+        folder_datas[date].append(file)
+
+    for date in folder_datas:
+        log(f"compress {date} -> {date}.7z")
+        out_file = os.path.join(daily_folder, f'{date}.7z')
+        compress_files([os.path.join(daily_folder,i) for i in folder_datas[date]], out_file, 9)
+
+        # 上传到tg 
+        log(f"tg upload {out_file}")
+        ses = '1BVtsOGYBu8XQemcEajKaoxqYAUOVIlF-Dyb9zCzR5Na9DJKVTC03W23hU6wB2wkyrMfkCqEXasFyPBbEd5p3TLoGktw5quatBHmj5ln7cm8lW5kmeW4RaK-idCzswxPEgX_oiz6NqNlG5I5HMifzMcORrmTtstshq93AaidszKe3LCTjQ09qpt3ORi66RipkdI-Q5qmaFfkDMKIiEtQWMa1MXzZ6d8-rt4OFrx8M545Z7budJGyVxvzxskH0uq9gNC4lPP-p97irGafb9Vn26ZvrU_ETMeadoh5qKqs_IT2_AFgZeAa53PnYH_qbcaO2AMRWmsHxMlocv4baVk_PHJfIMooPiDU='
+        tg_upload(ses, out_file, 'bin_daily')
+
+        # # 删除源文件
+        log(f"delete {out_file}")
+        # os.remove(out_file)
+
 def write_daily(_wait_write, id):
+    _wait_write = dict(sorted(_wait_write.items()))
+
     for date in _wait_write:
+        # 检查是否是新的一天数据
+        # 文件夹中没有 f'{date}_depth' 开头的文件
+        new_day = True
+        date_head = f'{date}_depth'
+        for file in os.listdir(daily_folder):
+            if file.startswith(date_head):
+                # 已经又该日期文件存在，不是新的一天
+                new_day = False
+                break
+        if new_day:
+            # 打包压缩所有的日期文件
+            # 发送到tg频道
+            compress_date_file_to_tg()
+
         file = os.path.join(daily_folder, f'{date}_depth_{id}.csv')
         # 如果文件不存在，需要写入列名
         if os.path.exists(file) == False:
