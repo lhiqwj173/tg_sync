@@ -89,6 +89,8 @@ def write_daily(_wait_write, id):
     _wait_write = dict(sorted(_wait_write.items()))
 
     for date in _wait_write:
+        log(f"write_daily {date}")
+
         # 检查是否是新的一天数据
         # 文件夹中没有 f'{date}_depth' 开头的文件
         new_day = True
