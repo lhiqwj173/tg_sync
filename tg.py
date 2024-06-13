@@ -133,32 +133,37 @@ def insert_data(datas, col):
         raise
 
 def handle_file(file_path, id):
-    # 判断文件是否存在
-    if not os.path.exists(file_path):
-        return True
-
-    # 解压文件
     try:
-        decompress(file_path)
-    except:
-        return False
+        file = os.path.basename(file_path)
 
-    file = os.path.basename(file_path)
+        # 判断文件是否存在
+        if not os.path.exists(file_path):
+            log(f"{file} 文件不存在")
+            return True
 
-    parser = None
-    col = None
-    if 'trade' in file:
-        parser = trade(file_path)
-        col = col_trade
-    elif 'depth' in file:
-        parser = depth(file_path)
-        col = col_depth
-    else:
-        return False
+        # 解压文件
+        try:
+            log(f"{file} 解压文件")
+            decompress(file_path)
+        
+        except Exception as e:
+            log(f"{file} 解压文件失败\n{e}")
+            return False
 
-    try:
+        log(f"{file} 分配 parser")
+        parser = None
+        col = None
+        if 'trade' in file:
+            parser = trade(file_path)
+            col = col_trade
+        elif 'depth' in file:
+            parser = depth(file_path)
+            col = col_depth
+        else:
+            return False
+
         t0 = time.time()
-        # 解析数据
+        log(f"{file} 解析数据")
         datas = []
         wait_write = {}
         for data in parser:
@@ -181,7 +186,7 @@ def handle_file(file_path, id):
 
         if wait_write:
             # 写入每日文件
-            log(f"记录文件")
+            log(f"{file} 记录文件")
             write_daily(wait_write, id)
             log(f'{file} 写入文件完毕, 耗时:{time.time() - t0:.2f}s')
 
