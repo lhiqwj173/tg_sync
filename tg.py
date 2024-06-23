@@ -213,17 +213,21 @@ def handle_file(file_path, id):
 
             if len(datas) == 30:
                 check_need_write(datas, wait_write)
+
+                # 不储存 mongo
                 # 插入数据库
-                insert_data(datas, col)
+                # insert_data(datas, col)
 
                 datas = []
 
         if datas:
             check_need_write(datas, wait_write)
-            # 插入数据库
-            insert_data(datas, col)
 
-        log(f'{file} 写入mongo完毕, 耗时:{time.time() - t0:.2f}s')
+            # 不储存 mongo
+            # 插入数据库
+            # insert_data(datas, col)
+
+        log(f'{file} 解析数据完毕, 耗时:{time.time() - t0:.2f}s')
         t0 = time.time()
 
         if wait_write:
@@ -378,20 +382,21 @@ if __name__ == "__main__":
         daily_folder = os.path.join(os.path.dirname(path), 'binance_daily_mean_std_data')
         os.makedirs(daily_folder, exist_ok=True)
 
-        client = pymongo.MongoClient()
-        db = client['binance']
-        col_trade = db['trade']
-        col_depth = db['depth']
-        col_trade.create_index([
-                ('symbol', 1),
-                ('save_timestamp', 1),
-                ("id", 1)
-            ], unique=True)
-        col_depth.create_index([
-                ('symbol', 1),
-                ('save_timestamp', 1),
-                ("id", 1)
-            ], unique=True)
+        # 不储存到mongo
+        # client = pymongo.MongoClient()
+        # db = client['binance']
+        # col_trade = db['trade']
+        # col_depth = db['depth']
+        # col_trade.create_index([
+        #         ('symbol', 1),
+        #         ('save_timestamp', 1),
+        #         ("id", 1)
+        #     ], unique=True)
+        # col_depth.create_index([
+        #         ('symbol', 1),
+        #         ('save_timestamp', 1),
+        #         ("id", 1)
+        #     ], unique=True)
 
     # 创建客户端
     client = TelegramClient(StringSession(load_session_string()), api_id, api_hash)
