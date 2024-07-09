@@ -99,7 +99,8 @@ def compress_date_file_to_tg(new_date):
         a.mkdir('/daily_bin_data')
 
     # 删除一个月以前的文件
-    for file in a.listdir('/daily_bin_data'):
+    for file_dict in a.listdir('/daily_bin_data'):
+        file = file_dict['name']
         date = file.replace('.7z', '')
         if date < (datetime.datetime.now() - datetime.timedelta(days=30)).strftime("%Y-%m-%d"):
             log(f"delete {date}")
