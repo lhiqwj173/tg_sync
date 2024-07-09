@@ -61,7 +61,11 @@ def check_need_write(datas, _wait_write):
 def run_kaggle_notebook(notebook):
     # 切换到指定目录
     _path = os.getcwd()
-    os.chdir('/mnt/ssd/root/code/kaggle/')
+
+    _kaggle_folder = os.path.join('/tmp', 'kaggle')
+    if not os.path.exists(_kaggle_folder):
+        os.mkdir(_kaggle_folder)
+    os.chdir(_kaggle_folder)
 
     # 定义要执行的命令
     command2 = f"kaggle kernels pull {notebook} -m"
