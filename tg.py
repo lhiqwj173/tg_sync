@@ -19,6 +19,7 @@ from helper import update_done_file, is_done_file
 from compress import compress_date
 
 from py_ext.tg import tg_upload
+from py_ext.alist import alist
 from binance_paser import trade, depth
 
 """
@@ -90,15 +91,30 @@ def compress_date_file_to_tg(new_date):
             folder_datas[date] = []
         folder_datas[date].append(file)
 
+    # ALIST
+    a = alist('admin', 'LHss6632673')
+    cur_files = [i['name'] for i in a.listdir('/')]
+    if 'daily_bin_data' not in cur_files:
+        print(f'mkdir: /daily_bin_data')
+        a.mkdir('/daily_bin_data')
+
+    # 删除一个月以前的文件
+    for file in a.listdir('/daily_bin_data'):
+        date = file.replace('.7z', '')
+        if date < (datetime.datetime.now() - datetime.timedelta(days=30)).strftime("%Y-%m-%d"):
+            log(f"delete {date}")
+            a.delete(f'/daily_bin_data/{date}.7z')
+
     for date in folder_datas:
         log(f"compress {date} -> {date}.7z")
         out_file = os.path.join(daily_folder, f'{date}.7z')
         compress_files([os.path.join(daily_folder,i) for i in folder_datas[date]], out_file, 9)
 
-        # 上传到tg 
-        log(f"tg upload {out_file}")
-        ses = '1BVtsOGYBu8XQemcEajKaoxqYAUOVIlF-Dyb9zCzR5Na9DJKVTC03W23hU6wB2wkyrMfkCqEXasFyPBbEd5p3TLoGktw5quatBHmj5ln7cm8lW5kmeW4RaK-idCzswxPEgX_oiz6NqNlG5I5HMifzMcORrmTtstshq93AaidszKe3LCTjQ09qpt3ORi66RipkdI-Q5qmaFfkDMKIiEtQWMa1MXzZ6d8-rt4OFrx8M545Z7budJGyVxvzxskH0uq9gNC4lPP-p97irGafb9Vn26ZvrU_ETMeadoh5qKqs_IT2_AFgZeAa53PnYH_qbcaO2AMRWmsHxMlocv4baVk_PHJfIMooPiDU='
-        tg_upload(ses, out_file, 'bin_daily')
+        # # 上传到tg 
+        # log(f"tg upload {out_file}")
+        # ses = '1BVtsOGYBu8XQemcEajKaoxqYAUOVIlF-Dyb9zCzR5Na9DJKVTC03W23hU6wB2wkyrMfkCqEXasFyPBbEd5p3TLoGktw5quatBHmj5ln7cm8lW5kmeW4RaK-idCzswxPEgX_oiz6NqNlG5I5HMifzMcORrmTtstshq93AaidszKe3LCTjQ09qpt3ORi66RipkdI-Q5qmaFfkDMKIiEtQWMa1MXzZ6d8-rt4OFrx8M545Z7budJGyVxvzxskH0uq9gNC4lPP-p97irGafb9Vn26ZvrU_ETMeadoh5qKqs_IT2_AFgZeAa53PnYH_qbcaO2AMRWmsHxMlocv4baVk_PHJfIMooPiDU='
+        # tg_upload(ses, out_file, 'bin_daily')
+        a.upload(out_file, '/daily_bin_data')
 
         # # # 删除源文件
         # log(f"delete {out_file}")
@@ -168,7 +184,7 @@ def insert_data(datas, col):
     except Exception as e:
         raise
 
-def handle_file(file_path, id):
+def handle_file(file_path, id, need_decompress=True):
     try:
         file = os.path.basename(file_path)
 
@@ -178,19 +194,20 @@ def handle_file(file_path, id):
             return True
 
         # 解压文件
-        try:
-            log(f"{file} 解压文件")
-            decompress(file_path, 'decompress_temp')
+        if need_decompress:
+            try:
+                log(f"{file} 解压文件")
+                decompress(file_path, 'decompress_temp')
 
-            # 移出文件
-            folder, file_name = os.path.split(file_path)
-            temp_file = os.path.join(folder, 'decompress_temp', 'data', file_name)
-            os.rename(temp_file, file_path)
-        
-        except Exception as e:
-            log(f"{file} 解压文件失败\n{e}")
-            raise
-            return False
+                # 移出文件
+                folder, file_name = os.path.split(file_path)
+                temp_file = os.path.join(folder, 'decompress_temp', 'data', file_name)
+                os.rename(temp_file, file_path)
+            
+            except Exception as e:
+                log(f"{file} 解压文件失败\n{e}")
+                raise
+                return False
 
         log(f"{file} 分配 parser")
         parser = None
@@ -362,7 +379,7 @@ async def receiver():
 
 if __name__ == "__main__":
 
-    # handle_file(r"\\192.168.100.203\wd_media\BINANCE_DATA\trade_1710289475620")
+    handle_file(r"\\192.168.100.203\wd_media\BINANCE_DATA\depth_10_1720426109361", 0, False)
 
     # 获取命令行参数
     if len(sys.argv) != 6:
