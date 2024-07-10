@@ -31,9 +31,9 @@ def update_done_file(file):
 
 def is_done_file(file):
     # 获取最新的时间
-    # 最新时间前1小时的数据不再处理
-    latest_time = int(done_files[-1].split('_')[-1])
-    return (file in done_files) or (int(file.split('_')[-1]) <= latest_time+3600*1000 )
+    # 最新时间前12小时的数据不再处理
+    latest_time = int(done_files[-1].split('_')[-1]) if done_files else 0
+    return (file in done_files) or (int(file.split('_')[-1]) <= latest_time-3600*1000*12 )
 
 t = 0
 def progress_cb(current, total):
