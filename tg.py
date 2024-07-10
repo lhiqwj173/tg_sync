@@ -289,7 +289,7 @@ async def sender():
             cur_t = time.time()
             if not is_done_file(file) and mtime < cur_t - 60 and ctime < cur_t - 60: 
                 # 如果有新文件，修改时间为1min前，上传到频道
-                log(f"Uploading{file}")
+                log(f"Uploading {file}")
                 # await client.send_file(entity, _file, progress_callback=progress_cb)
 
                 with open(_file, "rb") as out:
