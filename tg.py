@@ -273,6 +273,8 @@ async def sender():
 
         # 获取文件列表
         files = os.listdir(path)
+
+        wait_del_files = []
         
         for file in files:
 
@@ -296,8 +298,11 @@ async def sender():
 
                 update_done_file(file)
 
-                log("删除原文件")
-                os.remove(_file)
+                wait_del_files.append(_file)
+
+        for _file in wait_del_files:
+            log("删除原文件")
+            os.remove(_file)
                 
         await asyncio.sleep(30)
 
