@@ -350,6 +350,7 @@ async def receiver():
         messages = client.iter_messages(entity, reverse=True)
 
         # 循环遍历消息并筛选出包含文件的消息
+        success = 0
         async for message in messages:
 
             # 检查是否处理更新
@@ -374,8 +375,14 @@ async def receiver():
                 working_list.append(message.file.name)
                 log("-----------")
 
+                # 成功处理后重新获取messages遍历 
+                success = 1
+                break
+
             except Exception as e:
-                log(f"Error: {e}")
+                msg = f"Error: {e}"
+                log(msg)
+                send_wx(msg)
                 break
 
             # 不在此处压缩打包，影响效率
@@ -388,7 +395,9 @@ async def receiver():
             #     date = file_date
             #     log(f"打包完成, 更新日期 > {date}")
 
-        await asyncio.sleep(60 * 5)
+        # 成功下载文件后不需要等待，下载过程耗费了时间
+        if not success:
+            await asyncio.sleep(60 * 5)
 
 if __name__ == "__main__":
 
