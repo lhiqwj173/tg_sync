@@ -350,6 +350,13 @@ async def receiver():
     while True:
         messages = client.iter_messages(entity, reverse=True)
 
+        with open('messages.txt', 'w') as f:
+            for message in messages:
+                if message.file and message.file.name:
+                    f.write(str(message.file.name) + '\n')
+        
+        sys.exit(0) 
+
         # 循环遍历消息并筛选出包含文件的消息
         success = 0
         async for message in messages:
