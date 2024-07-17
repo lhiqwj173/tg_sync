@@ -363,22 +363,24 @@ async def receiver():
                 msgs.append(t_msg(t, message))
         msgs = sorted(msgs, key=lambda x: x.timestamp)
 
-        with open('messages.txt', 'w') as f:
-            for msg in msgs:
-                f.write(f'[{msg.timestamp}] {msg.tg_msg.file.name}\n')
+        # with open('messages.txt', 'w') as f:
+        #     for msg in msgs:
+        #         f.write(f'[{msg.timestamp}] {msg.tg_msg.file.name}\n')
         
-        sys.exit(0)
+        # sys.exit(0)
 
         # 循环遍历消息并筛选出包含文件的消息
         success = 0
-        async for message in msgs:
+        async for msg in msgs:
 
             # 检查是否处理更新
             updater(update_q)
 
             try:
-                if is_done_file(message.timestamp):
+                if is_done_file(msg.timestamp):
                     continue
+
+                message = msg.tg_msg
 
                 log("-----------")
                 log(f"File Name: {message.file.name}")
@@ -397,7 +399,6 @@ async def receiver():
 
                 # 成功处理后重新获取messages遍历 
                 success = 1
-                break
 
             except Exception as e:
                 msg = f"Error: {e}"

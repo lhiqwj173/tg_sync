@@ -19,10 +19,10 @@ if os.path.exists('done.txt'):
     with open('done.txt', 'r') as f:
         latest_time = int(f.read().strip())
 
-def update_done_file(timestamp):
+def update_done_file(file_name):
     global latest_time
 
-    latest_time = int(timestamp)
+    latest_time = int(file_name.split('_')[-1])
     with open('done.txt', 'w') as f:
         f.write(str(latest_time))
 
