@@ -351,7 +351,7 @@ async def receiver():
         messages = client.iter_messages(entity, reverse=True)
 
         with open('messages.txt', 'w') as f:
-            for message in messages:
+            async for message in messages:
                 if message.file and message.file.name:
                     f.write(str(message.file.name) + '\n')
         
