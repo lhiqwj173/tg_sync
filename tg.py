@@ -371,7 +371,7 @@ async def receiver():
 
         # 循环遍历消息并筛选出包含文件的消息
         success = 0
-        async for msg in msgs:
+        for msg in msgs:
 
             # 检查是否处理更新
             updater(update_q)
@@ -402,9 +402,8 @@ async def receiver():
 
             except Exception as e:
                 msg = f"Error: {e}"
-                log(msg)
                 send_wx(msg)
-                break
+                raise Exception(f'{msg} {e}')
 
             # 不在此处压缩打包，影响效率
             # log("check compress_date")
