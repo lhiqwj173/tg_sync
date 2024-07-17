@@ -130,9 +130,10 @@ def compress_date_file_to_tg(new_date):
 
     if len(folder_datas) > 0:
         # 重启kaggle计算
-        notebook = 'qtz173/bin-daily-run'
-        log(f"启动kaggle {notebook}")
-        run_kaggle_notebook(notebook)
+        notebooks = ['qtz173/bin-daily-run', 'qtz173/bin-train-data']
+        for notebook in notebooks:
+            log(f"启动kaggle {notebook}")
+            run_kaggle_notebook(notebook)
 
 def write_daily(_wait_write, id):
     _wait_write = dict(sorted(_wait_write.items()))
