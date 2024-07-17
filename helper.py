@@ -13,27 +13,23 @@ def load_session_string():
 
 
 # 已完成的文件列表
-done_files = []
+latest_time = 0
 if os.path.exists('done.txt'):
     # 读取已完成的文件列表
     with open('done.txt', 'r') as f:
-        done_files = list(set(f.read().split('\n')))
-    # 排序
-    done_files = sorted(done_files)
+        latest_time = int(f.read().strip())
 
-def update_done_file(file):
-    global done_files
+def update_done_file(timestamp):
+    global latest_time
 
-    done_files.append(file)
+    latest_time = int(timestamp)
     with open('done.txt', 'w') as f:
-        for file in done_files:
-            f.write(file + '\n')
+        f.write(str(latest_time))
 
-def is_done_file(file):
+def is_done_file(timestamp):
     # 获取最新的时间
     # 最新时间前12小时的数据不再处理
-    latest_time = int(done_files[-1].split('_')[-1]) if done_files else 0
-    return (file in done_files) or (int(file.split('_')[-1]) <= latest_time-3600*1000*12 )
+    return timestamp < latest_time
 
 t = 0
 def progress_cb(current, total):

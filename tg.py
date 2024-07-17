@@ -1,4 +1,5 @@
 import asyncio
+from collections import OrderedDict
 import sys, os, time, datetime
 import pymongo, subprocess
 from pymongo.errors import BulkWriteError
@@ -331,6 +332,11 @@ def saver(job_q, update_q, id):
         update_q.put(_name)
         log(f"[{id}]File Handled, send to updater {_name}")
 
+class t_msg():
+    def __init__(self, timestamp, tg_msg):
+        self.timestamp = timestamp
+        self.tg_msg = tg_msg
+
 async def receiver():
     await get_channel()
 
@@ -351,28 +357,27 @@ async def receiver():
         messages = client.iter_messages(entity, reverse=True)
 
         msgs = []
-        with open('messages.txt', 'w') as f:
-            async for message in messages:
-                if message.file and message.file.name:
-                    f.write(f'[{message.id}]' + str(message.file.name) + '\n')
-                    msgs.append(message)
-        
-        message = msgs[60]
-        _file = os.path.join(path, message.file.name)
-        with open(_file, "wb") as out:
-            await download_file(client, message.document, out, progress_callback=progress_cb)
+        async for message in messages:
+            if message.file and message.file.name:
+                t = int(message.file.name.split('_')[-1])
+                msgs.append(t_msg(t, message))
+        msgs = sorted(msgs, key=lambda x: x.timestamp)
 
-        sys.exit(0) 
+        with open('messages.txt', 'w') as f:
+            for msg in msgs:
+                f.write(f'[{msg.timestamp}] {msg.tg_msg.file.name}\n')
+        
+        sys.exit(0)
 
         # 循环遍历消息并筛选出包含文件的消息
         success = 0
-        async for message in messages:
+        async for message in msgs:
 
             # 检查是否处理更新
             updater(update_q)
 
             try:
-                if not (message.file and message.file.name and not is_done_file(message.file.name) and message.file.name not in working_list):
+                if is_done_file(message.timestamp):
                     continue
 
                 log("-----------")
