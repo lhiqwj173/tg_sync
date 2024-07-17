@@ -350,11 +350,18 @@ async def receiver():
     while True:
         messages = client.iter_messages(entity, reverse=True)
 
+        msgs = []
         with open('messages.txt', 'w') as f:
             async for message in messages:
                 if message.file and message.file.name:
-                    f.write(str(message.file.name) + '\n')
+                    f.write(f'[{message.id}]' + str(message.file.name) + '\n')
+                    msgs.append(message)
         
+        message = msgs[60]
+        _file = os.path.join(path, message.file.name)
+        with open(_file, "wb") as out:
+            await download_file(client, message.document, out, progress_callback=progress_cb)
+
         sys.exit(0) 
 
         # 循环遍历消息并筛选出包含文件的消息
