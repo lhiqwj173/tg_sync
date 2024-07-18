@@ -305,11 +305,12 @@ async def sender():
                 
         await asyncio.sleep(30)
 
-def updater(update_q, working_list):
+def updater(update_q, working_list, done_list):
     while not update_q.empty():
         _name = update_q.get()
         update_done_file(_name)
         working_list.remove(_name)
+        done_list.append(_name)
         log(f"File Updated: {_name}")
 
 def saver(job_q, update_q, id):
@@ -350,6 +351,7 @@ async def receiver():
         p_list[-1].start()
 
     working_list = []
+    done_list = []
     while True:
         messages = client.iter_messages(entity, reverse=True)
 
@@ -372,17 +374,18 @@ async def receiver():
 
             # 检查是否处理更新
             log("check updater")
-            updater(update_q, working_list)
+            updater(update_q, working_list, done_list)
+            log(f"working_list: {working_list}")
+            log(f"done_list: {done_list}")
 
             try:
                 message = msg.tg_msg
-                if is_done_file(msg.timestamp) or message.file.name in working_list:
+                if is_done_file(msg.timestamp) or message.file.name in working_list or message.file.name in done_list:
                     continue
 
                 log("-----------")
                 log(f"File Name: {message.file.name}")
                 log(f"File Size: {message.file.size}")
-                log(f"working_list: {working_list}")
 
                 # 使用 download_file() 方法下载文件
                 # await client.download_media(message, file=os.path.join(path, message.file.name), progress_callback=progress_cb)
