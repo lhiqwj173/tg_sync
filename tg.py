@@ -101,7 +101,7 @@ def compress_date_file_to_tg(new_date):
     a = alist('admin', 'LHss6632673')
     cur_files = [i['name'] for i in a.listdir('/')]
     if 'daily_bin_data' not in cur_files:
-        print(f'mkdir: /daily_bin_data')
+        log(f'mkdir: /daily_bin_data')
         a.mkdir('/daily_bin_data')
 
     # 删除一个月以前的文件
@@ -196,78 +196,74 @@ def insert_data(datas, col):
         raise
 
 def handle_file(file_path, id, need_decompress=True):
-    try:
-        file = os.path.basename(file_path)
+    file = os.path.basename(file_path)
 
-        # 判断文件是否存在
-        if not os.path.exists(file_path):
-            log(f"{file} 文件不存在")
-            return True
+    # 判断文件是否存在
+    if not os.path.exists(file_path):
+        log(f"{file} 文件不存在")
+        return True
 
-        # 解压文件
-        if need_decompress:
-            try:
-                log(f"{file} 解压文件")
-                decompress(file_path, 'decompress_temp')
+    # 解压文件
+    if need_decompress:
+        try:
+            log(f"{file} 解压文件")
+            decompress(file_path, 'decompress_temp')
 
-                # 移出文件
-                folder, file_name = os.path.split(file_path)
-                temp_file = os.path.join(folder, 'decompress_temp', 'data', file_name)
-                os.rename(temp_file, file_path)
-            
-            except Exception as e:
-                log(f"{file} 解压文件失败\n{e}")
-                raise
-                return False
-
-        log(f"{file} 分配 parser")
-        parser = None
-        col = None
-        if 'trade' in file:
-            parser = trade(file_path)
-            col = col_trade
-        elif 'depth' in file:
-            parser = depth(file_path)
-            col = col_depth
-        else:
+            # 移出文件
+            folder, file_name = os.path.split(file_path)
+            temp_file = os.path.join(folder, 'decompress_temp', 'data', file_name)
+            os.rename(temp_file, file_path)
+        
+        except Exception as e:
+            log(f"{file} 解压文件失败\n{e}")
+            raise
             return False
 
-        t0 = time.time()
-        log(f"{file} 解析数据")
-        datas = []
-        wait_write = {}
-        for data in parser:
-            datas.append(data)
+    log(f"{file} 分配 parser")
+    parser = None
+    col = None
+    if 'trade' in file:
+        parser = trade(file_path)
+        col = col_trade
+    elif 'depth' in file:
+        parser = depth(file_path)
+        col = col_depth
+    else:
+        return False
 
-            if len(datas) == 30:
-                check_need_write(datas, wait_write)
+    t0 = time.time()
+    log(f"{file} 解析数据")
+    datas = []
+    wait_write = {}
+    for data in parser:
+        datas.append(data)
 
-                # 不储存 mongo
-                # 插入数据库
-                # insert_data(datas, col)
-
-                datas = []
-
-        if datas:
+        if len(datas) == 30:
             check_need_write(datas, wait_write)
 
             # 不储存 mongo
             # 插入数据库
             # insert_data(datas, col)
 
-        log(f'{file} 解析数据完毕, 耗时:{time.time() - t0:.2f}s')
-        t0 = time.time()
+            datas = []
 
-        if wait_write:
-            # 写入每日文件
-            log(f"{file} 记录文件")
-            write_daily(wait_write, id)
-            log(f'{file} 写入文件完毕, 耗时:{time.time() - t0:.2f}s')
+    if datas:
+        check_need_write(datas, wait_write)
 
-        return True
-    except Exception as e:
-        log(f"Error: {e}")
-        return False
+        # 不储存 mongo
+        # 插入数据库
+        # insert_data(datas, col)
+
+    log(f'{file} 解析数据完毕, 耗时:{time.time() - t0:.2f}s')
+    t0 = time.time()
+
+    if wait_write:
+        # 写入每日文件
+        log(f"{file} 记录文件")
+        write_daily(wait_write, id)
+        log(f'{file} 写入文件完毕, 耗时:{time.time() - t0:.2f}s')
+
+    return True
 
 async def sender():
     await get_channel()
@@ -378,7 +374,7 @@ async def receiver():
             updater(update_q)
 
             try:
-                if is_done_file(msg.timestamp):
+                if is_done_file(msg.timestamp) or message.file.name in working_list:
                     continue
 
                 message = msg.tg_msg
@@ -402,6 +398,7 @@ async def receiver():
 
             except FileReferenceExpiredError:
                 # 重新获取messages遍历
+                log('FileReferenceExpiredError retry')
                 break
 
             except Exception as e:
