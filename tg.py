@@ -12,6 +12,7 @@ from py_ext.wechat import send_wx
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.tl.types import Channel
+from telethon.errors.rpcerrorlist import FileReferenceExpiredError 
 
 from FastTelethon import download_file, upload_file
 
@@ -397,13 +398,14 @@ async def receiver():
                 working_list.append(message.file.name)
                 log("-----------")
 
-                # 成功处理后重新获取messages遍历 
                 success = 1
 
+            except FileReferenceExpiredError:
+                # 重新获取messages遍历
+                break
+
             except Exception as e:
-                msg = f"Error: {e}"
-                send_wx(msg)
-                raise Exception(f'{msg} {e}')
+                raise Exception(f'{e}')
 
             # 不在此处压缩打包，影响效率
             # log("check compress_date")
