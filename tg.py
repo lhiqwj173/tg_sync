@@ -309,7 +309,7 @@ def updater(update_q, working_list):
     while not update_q.empty():
         _name = update_q.get()
         update_done_file(_name)
-        working_list.pop(_name)
+        working_list.remove(_name)
         log(f"File Updated: {_name}")
 
 def saver(job_q, update_q, id):
@@ -371,13 +371,13 @@ async def receiver():
         for msg in msgs:
 
             # 检查是否处理更新
+            log("check updater")
             updater(update_q, working_list)
 
             try:
+                message = msg.tg_msg
                 if is_done_file(msg.timestamp) or message.file.name in working_list:
                     continue
-
-                message = msg.tg_msg
 
                 log("-----------")
                 log(f"File Name: {message.file.name}")
