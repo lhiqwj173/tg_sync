@@ -362,11 +362,11 @@ async def receiver():
                 msgs.append(t_msg(t, message))
         msgs = sorted(msgs, key=lambda x: x.timestamp)
 
-        # with open('messages.txt', 'w') as f:
-        #     for msg in msgs:
-        #         f.write(f'[{msg.timestamp}] {msg.tg_msg.file.name}\n')
+        with open('messages.txt', 'w') as f:
+            for msg in msgs:
+                f.write(f'[{msg.timestamp}] {msg.tg_msg.file.name}\n')
         
-        # sys.exit(0)
+        sys.exit(0)
 
         # 循环遍历消息并筛选出包含文件的消息
         success = 0
