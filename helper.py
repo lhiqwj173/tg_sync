@@ -22,7 +22,8 @@ if os.path.exists('done.txt'):
 def update_done_file(file_name):
     global latest_time
 
-    latest_time = int(file_name.split('_')[-1])
+    # 向前推1000秒，避免 先处理的文件时间戳略大, 导致略小时间戳的文件无法被处理
+    latest_time = int(file_name.split('_')[-1]) - 1000
     with open('done.txt', 'w') as f:
         f.write(str(latest_time))
 
