@@ -12,6 +12,7 @@ from py_ext.wechat import send_wx
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from telethon.tl.types import Channel
+from telethon import errors
 from telethon.errors.rpcerrorlist import FileReferenceExpiredError 
 
 from FastTelethon import download_file, upload_file
@@ -23,7 +24,6 @@ from compress import compress_date
 from py_ext.tg import tg_upload
 from py_ext.alist import alist
 from binance_paser import trade, depth
-
 """
 提速
 https://gist.github.com/painor/7e74de80ae0c819d3e9abcf9989a8dd6
@@ -291,9 +291,21 @@ async def sender():
                 log(f"Uploading {file}")
                 # await client.send_file(entity, _file, progress_callback=progress_cb)
 
-                with open(_file, "rb") as out:
-                    media = await upload_file(client, out, file, progress_callback=progress_cb)
-                    await client.send_file(entity, media)
+                succsee = False
+                for i in range(5):
+                    try:
+                        with open(_file, "rb") as out:
+                            media = await upload_file(client, out, file, progress_callback=progress_cb)
+                            await client.send_file(entity, media)
+                        succsee = True
+                        break
+                    except errors.FloodWaitError as e:
+                        log('Have to sleep', e.seconds, 'seconds, then will retry')
+                        time.sleep(e.seconds)
+                    except Exception as e:
+                        raise e
+                if not succsee:
+                    raise Exception(f"[{file}]Upload Failed")
 
                 update_done_file(file)
 
@@ -373,7 +385,7 @@ async def receiver():
         for msg in msgs:
 
             # 检查是否处理更新
-            log("check updater")
+            # log("check updater")
             updater(update_q, working_list, done_list)
             # log(f"working_list: {working_list}")
             # log(f"done_list: {done_list}")
