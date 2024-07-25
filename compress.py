@@ -58,7 +58,7 @@ def keep_compress_date(path):
             compress_date(dates[0], path)
             dates = dates[1:]
 
-        time.sleep(5*60)
+        time.sleep(10*60)
 
 if __name__ == "__main__":
     # 获取命令行参数
