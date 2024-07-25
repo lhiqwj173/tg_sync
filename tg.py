@@ -272,11 +272,14 @@ async def sender():
 
         # 获取文件列表
         files = os.listdir(path)
-
-        wait_del_files = []
+        msgs = []
+        for i in files:
+            t = int(split('_')[-1])
+            msgs.append(t_msg(t, i))
+        msgs = sorted(msgs, key=lambda x: x.timestamp)
         
-        for file in files:
-
+        for obj in msgs:
+            file = obj.tg_msg
             _file = os.path.join(path, file)
 
             # 获取文件修改时间
@@ -286,10 +289,9 @@ async def sender():
             ctime = os.path.getctime(_file)
 
             cur_t = time.time()
-            if not is_done_file(int(file.split('_')[-1])) and mtime < cur_t - 60 and ctime < cur_t - 60: 
+            if mtime < cur_t - 60 and ctime < cur_t - 60: 
                 # 如果有新文件，修改时间为1min前，上传到频道
                 log(f"Uploading {file}")
-                # await client.send_file(entity, _file, progress_callback=progress_cb)
 
                 succsee = False
                 for i in range(5):
@@ -307,14 +309,9 @@ async def sender():
                 if not succsee:
                     raise Exception(f"[{file}]Upload Failed")
 
-                update_done_file(file)
+                log("删除原文件")
+                os.remove(_file)
 
-                wait_del_files.append(_file)
-
-        for _file in wait_del_files:
-            log("删除原文件")
-            os.remove(_file)
-                
         await asyncio.sleep(30)
 
 def updater(update_q, working_list, done_list):
@@ -392,7 +389,7 @@ async def receiver():
 
             try:
                 message = msg.tg_msg
-                if is_done_file(msg.timestamp) or message.file.name in working_list or message.file.name in done_list:
+                if is_done_file(message.file.name) or message.file.name in working_list or message.file.name in done_list:
                     continue
 
                 log("-----------")

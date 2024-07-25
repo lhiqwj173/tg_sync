@@ -19,18 +19,28 @@ if os.path.exists('done_timestamp.txt'):
     with open('done_timestamp.txt', 'r') as f:
         latest_time = int(f.read().strip())
 
+done_list = []
+if os.path.exists('done.txt'):
+    with open('done.txt', 'r') as f:
+        done_list = f.read().splitlines()
+
 def update_done_file(file_name):
-    global latest_time
+    global latest_time, done_list
 
     # 向前推1000秒，避免 先处理的文件时间戳略大, 导致略小时间戳的文件无法被处理
     latest_time = int(file_name.split('_')[-1]) - 1000
     with open('done_timestamp.txt', 'w') as f:
         f.write(str(latest_time))
 
-def is_done_file(timestamp):
+    done_list.append(file_name)
+    with open('done.txt', 'a') as f:
+        f.write(file_name + '\n')
+
+def is_done_file(file_name):
     # 获取最新的时间
     # 最新时间前12小时的数据不再处理
-    return timestamp < latest_time
+    timestamp = int(file_name.split('_')[-1])
+    return timestamp < latest_time or file_name in done_list
 
 t = 0
 def progress_cb(current, total):
