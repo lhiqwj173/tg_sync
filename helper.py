@@ -14,9 +14,9 @@ def load_session_string():
 
 # 已完成的文件列表
 latest_time = 0
-if os.path.exists('done.txt'):
+if os.path.exists('done_timestamp.txt'):
     # 读取已完成的文件列表
-    with open('done.txt', 'r') as f:
+    with open('done_timestamp.txt', 'r') as f:
         latest_time = int(f.read().strip())
 
 def update_done_file(file_name):
@@ -24,7 +24,7 @@ def update_done_file(file_name):
 
     # 向前推1000秒，避免 先处理的文件时间戳略大, 导致略小时间戳的文件无法被处理
     latest_time = int(file_name.split('_')[-1]) - 1000
-    with open('done.txt', 'w') as f:
+    with open('done_timestamp.txt', 'w') as f:
         f.write(str(latest_time))
 
 def is_done_file(timestamp):
