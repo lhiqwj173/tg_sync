@@ -14,6 +14,7 @@ from telethon.sessions import StringSession
 from telethon.tl.types import Channel
 from telethon import errors
 from telethon.errors.rpcerrorlist import FileReferenceExpiredError 
+from telethon.errors.rpcbaseerrors import FloodError
 
 from FastTelethon import download_file, upload_file
 
@@ -301,9 +302,10 @@ async def sender():
                             await client.send_file(entity, media)
                         succsee = True
                         break
-                    except errors.FloodWaitError as e:
-                        log('Have to sleep', e.seconds, 'seconds, then will retry')
-                        time.sleep(e.seconds)
+                    except FloodError:
+                        seconds = 5*60
+                        log('Have to sleep', seconds, 'seconds, then will retry')
+                        time.sleep(seconds)
                     except Exception as e:
                         raise e
                 if not succsee:
