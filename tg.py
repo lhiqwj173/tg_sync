@@ -274,7 +274,7 @@ async def sender():
         files = os.listdir(path)
         msgs = []
         for i in files:
-            t = int(split('_')[-1])
+            t = int(i.split('_')[-1])
             msgs.append(t_msg(t, i))
         msgs = sorted(msgs, key=lambda x: x.timestamp)
         
