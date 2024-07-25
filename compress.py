@@ -20,7 +20,7 @@ def compress_date(date, path):
     files = []
     for i in os.listdir(path):
         # .7z文件或文件夹 跳过
-        if i.endswith(".7z") or not os.path.isfile(os.path.join(path, i)):
+        if '.' in i or not os.path.isfile(os.path.join(path, i)):
             continue
 
         # 文件时间戳
