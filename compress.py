@@ -32,7 +32,7 @@ def compress_date(date, path):
             files.append(os.path.join(path, i))
 
     # 压缩打包
-    compress_files(files, package_path, 9)
+    compress_files(files, package_path, 9, max_size="5000m")
 
 def keep_compress_date(path):
     # 持久监控压缩日期文件
@@ -41,7 +41,7 @@ def keep_compress_date(path):
 
         for f in os.listdir(path):
             filepath = os.path.join(path, f)
-            if not os.path.isfile(filepath) or f.endswith(".7z"):
+            if not os.path.isfile(filepath) or '.' in f:
                 continue
             
             t = f.split("_")[-1][:-3]
