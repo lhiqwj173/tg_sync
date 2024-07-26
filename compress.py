@@ -57,6 +57,7 @@ def keep_compress_date(path):
             log(f"开始压缩文件日期 :{dates[0]}")
             compress_date(dates[0], path)
             dates = dates[1:]
+            log(f"压缩完成")
 
         time.sleep(10*60)
 
