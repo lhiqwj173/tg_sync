@@ -417,6 +417,7 @@ async def receiver():
                 break
 
             except Exception as e:
+                log(f'error type: {type(e)}')
                 raise Exception(f'{e}')
 
             # 不在此处压缩打包，影响效率
