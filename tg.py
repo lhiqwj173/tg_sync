@@ -306,7 +306,8 @@ async def sender():
                         log(FloodError)
                         seconds = 5*60
                         log('Have to sleep', seconds, 'seconds, then will retry')
-                        time.sleep(seconds)
+                        await asyncio.sleep(seconds)
+
                     except Exception as e:
                         raise e
                 if not succsee:
@@ -314,6 +315,8 @@ async def sender():
 
                 log("删除原文件")
                 os.remove(_file)
+
+                await asyncio.sleep(15)
 
         await asyncio.sleep(30)
 
