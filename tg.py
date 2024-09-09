@@ -303,6 +303,7 @@ async def sender():
                         succsee = True
                         break
                     except FloodError:
+                        log(FloodError)
                         seconds = 5*60
                         log('Have to sleep', seconds, 'seconds, then will retry')
                         time.sleep(seconds)
