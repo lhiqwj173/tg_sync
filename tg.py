@@ -302,9 +302,9 @@ async def sender():
                             await client.send_file(entity, media)
                         succsee = True
                         break
-                    except FloodError:
-                        log(FloodError)
-                        seconds = 5*60
+                    except FloodError as e:
+                        log(e)
+                        seconds = 60
                         log('Have to sleep', seconds, 'seconds, then will retry')
                         await asyncio.sleep(seconds)
 
