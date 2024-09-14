@@ -420,6 +420,11 @@ async def receiver():
                 log('FileReferenceExpiredError retry')
                 break
 
+            except asyncio.exceptions.IncompleteReadError:
+                # 重新获取messages遍历
+                log('IncompleteReadError retry')
+                break
+
             except Exception as e:
                 log(f'error type: {type(e)}')
                 raise Exception(f'{e}')
